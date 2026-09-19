@@ -1,0 +1,19 @@
+{
+  "id": "/",
+  "name": "ADAApps - Kişisel Uygulama Mağazası",
+  "short_name": "ADAApps",
+  "description": "Bağımsız web uygulamaları, PWA'lar ve tarayıcı eklentileri için kişisel ürün stüdyosu ve dağıtım vitrini.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
