@@ -5,6 +5,7 @@ import { Header } from './components/Header';
 import { Hero } from './components/Hero';
 import { AppCard } from './components/AppCard';
 import { AppModal } from './components/AppModal';
+import { AppDetailPage } from './components/AppDetailPage';
 import { QRCodeModal } from './components/QRCodeModal';
 import { WaitlistModal } from './components/WaitlistModal';
 import { AdaStoryModal } from './components/AdaStoryModal';
@@ -77,6 +78,73 @@ export default function App() {
   const [demoApp, setDemoApp] = useState<AppItem | null>(null);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+
+  // URL routing state for Individual Product Pages
+  const parseAppSlugFromUrl = (): string | null => {
+    if (typeof window === 'undefined') return null;
+    const path = window.location.pathname.replace(/^\/+|\/+$/g, '');
+    if (path.startsWith('app/')) {
+      return path.replace('app/', '');
+    }
+    if (window.location.hash) {
+      const hash = window.location.hash.replace(/^#\/?(app\/)?/, '');
+      if (hash) return hash;
+    }
+    const params = new URLSearchParams(window.location.search);
+    const qApp = params.get('app');
+    if (qApp) return qApp;
+    if (path && path !== '' && path !== 'index.html') {
+      return path;
+    }
+    return null;
+  };
+
+  const [routeSlug, setRouteSlug] = useState<string | null>(() => parseAppSlugFromUrl());
+
+  const activeRouteApp = useMemo(() => {
+    if (!routeSlug) return null;
+    return apps.find((a) => a.id.toLowerCase() === routeSlug.toLowerCase()) || null;
+  }, [apps, routeSlug]);
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setRouteSlug(parseAppSlugFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    window.addEventListener('hashchange', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.removeEventListener('hashchange', handlePopState);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (activeRouteApp) {
+      document.title = `${activeRouteApp.name} - ADA APPS`;
+    } else {
+      document.title = 'ADA APPS - Kişisel Uygulama Mağazası & Ürün Stüdyosu';
+    }
+  }, [activeRouteApp]);
+
+  const handleNavigateToApp = (app: AppItem) => {
+    try {
+      window.history.pushState({}, '', `/app/${app.id}`);
+    } catch {
+      window.location.hash = `/app/${app.id}`;
+    }
+    setRouteSlug(app.id);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleBackToCatalog = () => {
+    try {
+      window.history.pushState({}, '', '/');
+    } catch {
+      window.location.hash = '';
+    }
+    setRouteSlug(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   // In-app PWA install prompt handler
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -171,42 +239,54 @@ export default function App() {
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <Hero
-          onExploreClick={scrollToExplore}
-          onStoryClick={() => setIsStoryOpen(true)}
-          totalAppsCount={apps.length}
-          liveAppsCount={liveAppsCount}
-        />
+        {activeRouteApp ? (
+          <div className="py-6">
+            <AppDetailPage
+              app={activeRouteApp}
+              onBack={handleBackToCatalog}
+              onOpenQr={(a) => setQrApp(a)}
+              onOpenWaitlist={(a) => setWaitlistApp(a)}
+              onOpenLiveDemo={(a) => setDemoApp(a)}
+            />
+          </div>
+        ) : (
+          <>
+            {/* Hero Section */}
+            <Hero
+              onExploreClick={scrollToExplore}
+              onStoryClick={() => setIsStoryOpen(true)}
+              totalAppsCount={apps.length}
+              liveAppsCount={liveAppsCount}
+            />
 
         {/* Studio Quick Stats Bar */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 px-5 bg-slate-900/60 border border-slate-800/80 rounded-2xl mb-12 text-center text-xs">
           <div>
             <div className="text-xl sm:text-2xl font-extrabold text-white font-display">
-              {apps.length} Proje
+              {apps.length} Ürün
             </div>
             <div className="text-slate-400 text-[11px] mt-0.5">Stüdyo Portföyü</div>
           </div>
 
           <div>
             <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">
-              %0 Komisyon
+              {liveAppsCount} Canlı / Beta
             </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Doğrudan Dağıtım</div>
+            <div className="text-slate-400 text-[11px] mt-0.5">Aktif Kullanıma Açık</div>
           </div>
 
           <div>
             <div className="text-xl sm:text-2xl font-extrabold text-indigo-400 font-display">
-              11.300+
+              PWA
             </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Toplam Kurulum & Kullanıcı</div>
+            <div className="text-slate-400 text-[11px] mt-0.5">Doğrudan Web Dağıtımı</div>
           </div>
 
           <div>
             <div className="text-xl sm:text-2xl font-extrabold text-pink-400 font-display">
-              Sıfır İzleyici
+              Şeffaf
             </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Gizlilik Garantisi</div>
+            <div className="text-slate-400 text-[11px] mt-0.5">Veri & Gizlilik Mimarisi</div>
           </div>
         </div>
 
@@ -358,42 +438,45 @@ export default function App() {
           </div>
         </div>
 
-        {/* Application Cards Grid */}
-        {filteredApps.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-            {filteredApps.map((app) => (
-              <AppCard
-                key={app.id}
-                app={app}
-                onOpenDetails={(a) => setSelectedApp(a)}
-                onOpenQR={(a) => setQrApp(a)}
-                onOpenWaitlist={(a) => setWaitlistApp(a)}
-                onLaunchInteractiveDemo={(a) => setDemoApp(a)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 bg-slate-900/50 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto">
-            <Search className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-            <h3 className="text-base font-bold text-white mb-1">Aramanızla Eşleşen Uygulama Bulunamadı</h3>
-            <p className="text-xs text-slate-400 mb-4">
-              Farklı bir arama terimi deneyebilir veya filtreleri sıfırlayabilirsiniz.
-            </p>
-            <button
-              onClick={() => {
-                setSearchQuery('');
-                setSelectedPlatform('all');
-                setSelectedCategory('all');
-              }}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
-            >
-              Tüm Uygulamaları Göster
-            </button>
-          </div>
-        )}
+            {/* Application Cards Grid */}
+            {filteredApps.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
+                {filteredApps.map((app) => (
+                  <AppCard
+                    key={app.id}
+                    app={app}
+                    onOpenDetails={(a) => setSelectedApp(a)}
+                    onOpenQR={(a) => setQrApp(a)}
+                    onOpenWaitlist={(a) => setWaitlistApp(a)}
+                    onLaunchInteractiveDemo={(a) => setDemoApp(a)}
+                    onNavigateToPage={(a) => handleNavigateToApp(a)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-16 bg-slate-900/50 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto">
+                <Search className="w-8 h-8 text-slate-500 mx-auto mb-3" />
+                <h3 className="text-base font-bold text-white mb-1">Aramanızla Eşleşen Uygulama Bulunamadı</h3>
+                <p className="text-xs text-slate-400 mb-4">
+                  Farklı bir arama terimi deneyebilir veya filtreleri sıfırlayabilirsiniz.
+                </p>
+                <button
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedPlatform('all');
+                    setSelectedCategory('all');
+                  }}
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+                >
+                  Tüm Uygulamaları Göster
+                </button>
+              </div>
+            )}
 
-        {/* Why PWA / Distribution Manifesto Section */}
-        <WhyPwaSection />
+            {/* Why PWA / Distribution Manifesto Section */}
+            <WhyPwaSection />
+          </>
+        )}
       </main>
 
       {/* Footer */}
@@ -414,6 +497,10 @@ export default function App() {
         onOpenQR={(a) => {
           setSelectedApp(null);
           setQrApp(a);
+        }}
+        onNavigateToPage={(a) => {
+          setSelectedApp(null);
+          handleNavigateToApp(a);
         }}
       />
 

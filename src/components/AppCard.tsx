@@ -1,17 +1,14 @@
 import React from 'react';
 import { AppItem } from '../types';
 import { AppIcon } from './AppIcon';
+import { getAppStatusMeta } from '../utils/statusMeta';
 import { 
   ExternalLink, 
   QrCode, 
   Sparkles, 
-  Download, 
-  ShieldCheck, 
   ArrowRight, 
-  Layers,
-  Star,
-  Clock,
-  Compass
+  CheckCircle2,
+  Clock
 } from 'lucide-react';
 
 interface AppCardProps {
@@ -20,6 +17,7 @@ interface AppCardProps {
   onOpenQR: (app: AppItem) => void;
   onOpenWaitlist: (app: AppItem) => void;
   onLaunchInteractiveDemo: (app: AppItem) => void;
+  onNavigateToPage?: (app: AppItem) => void;
 }
 
 export const AppCard: React.FC<AppCardProps> = ({
@@ -27,11 +25,20 @@ export const AppCard: React.FC<AppCardProps> = ({
   onOpenDetails,
   onOpenQR,
   onOpenWaitlist,
-  onLaunchInteractiveDemo
+  onLaunchInteractiveDemo,
+  onNavigateToPage
 }) => {
   const isPWA = app.platform === 'pwa';
   const isExtension = app.platform === 'chrome_extension';
-  const isUpcoming = app.status === 'in_development' || app.status === 'concept';
+  const statusMeta = getAppStatusMeta(app.status);
+
+  const handleTitleClick = () => {
+    if (onNavigateToPage) {
+      onNavigateToPage(app);
+    } else {
+      onOpenDetails(app);
+    }
+  };
 
   return (
     <div className="group relative bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/90 rounded-2xl p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-2xl hover:shadow-indigo-950/20">
@@ -40,15 +47,24 @@ export const AppCard: React.FC<AppCardProps> = ({
         <div className="flex items-start justify-between gap-3 mb-3.5">
           <div className="flex items-center gap-3">
             {/* App Icon */}
-            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${app.accentColor} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform shrink-0`}>
+            <button 
+              type="button"
+              onClick={handleTitleClick}
+              className={`w-12 h-12 rounded-xl bg-gradient-to-br ${app.accentColor} flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform shrink-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              title={`${app.name} Sayfasına Git`}
+            >
               <AppIcon name={app.iconName} className="w-6 h-6" />
-            </div>
+            </button>
 
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base sm:text-lg font-bold text-white group-hover:text-indigo-300 transition font-display">
+                <button 
+                  type="button"
+                  onClick={handleTitleClick}
+                  className="text-left font-bold text-white group-hover:text-indigo-300 transition font-display text-base sm:text-lg cursor-pointer focus:outline-none"
+                >
                   {app.name}
-                </h3>
+                </button>
                 {app.isFeatured && (
                   <span className="hidden sm:inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300">
                     Öne Çıkan
@@ -61,29 +77,12 @@ export const AppCard: React.FC<AppCardProps> = ({
             </div>
           </div>
 
-          {/* Status Badge */}
+          {/* Unified Status Badge */}
           <div className="shrink-0">
-            {app.status === 'live' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-emerald-950/60 border border-emerald-500/30 text-emerald-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                Yayında
-              </span>
-            ) : app.status === 'beta' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-cyan-950/60 border border-cyan-500/30 text-cyan-300">
-                <Sparkles className="w-3 h-3" />
-                Beta
-              </span>
-            ) : app.status === 'in_development' ? (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-violet-950/60 border border-violet-500/30 text-violet-300">
-                <Clock className="w-3 h-3" />
-                Geliştiriliyor
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full bg-amber-950/60 border border-amber-500/30 text-amber-300">
-                <Sparkles className="w-3 h-3" />
-                Prototip
-              </span>
-            )}
+            <span className={`inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-1 rounded-full border ${statusMeta.badgeClass}`}>
+              <span className={`w-1.5 h-1.5 rounded-full ${statusMeta.dotClass} ${app.status === 'live' ? 'animate-pulse' : ''}`}></span>
+              {statusMeta.label}
+            </span>
           </div>
         </div>
 
@@ -99,7 +98,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           </div>
         </div>
 
-        {/* Tech Stack & Platform Badges */}
+        {/* Tech Stack & Verified Status Badges */}
         <div className="flex flex-wrap items-center gap-1.5 mb-4">
           <span className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-800 text-slate-300">
             {isPWA ? '📱 PWA' : isExtension ? '🧩 Eklenti' : app.platform === 'desktop' ? '💻 Windows 11' : '🌐 Web'}
@@ -112,12 +111,10 @@ export const AppCard: React.FC<AppCardProps> = ({
               {tech}
             </span>
           ))}
-          {app.installCountLabel && (
-            <span className="ml-auto text-[11px] text-slate-400 flex items-center gap-1">
-              <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-              <span>{app.rating}</span>
-              <span className="text-slate-500">•</span>
-              <span>{app.installCountLabel}</span>
+          {app.verifiedBadge && (
+            <span className="ml-auto text-[10px] text-emerald-400/90 font-medium flex items-center gap-1 bg-emerald-950/30 px-2 py-0.5 rounded-md border border-emerald-500/20">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>{app.verifiedBadge}</span>
             </span>
           )}
         </div>
@@ -129,7 +126,7 @@ export const AppCard: React.FC<AppCardProps> = ({
           onClick={() => onOpenDetails(app)}
           className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/70 hover:bg-slate-800 rounded-xl transition cursor-pointer flex items-center gap-1.5"
         >
-          <span>İncele & Bilgi</span>
+          <span>Ürün Hikayesi</span>
           <ArrowRight className="w-3.5 h-3.5" />
         </button>
 
@@ -140,28 +137,28 @@ export const AppCard: React.FC<AppCardProps> = ({
             title="Canlı Simülasyonu Gör"
             className="p-2 text-indigo-400 hover:text-indigo-300 bg-indigo-950/40 hover:bg-indigo-900/60 border border-indigo-500/20 rounded-xl transition cursor-pointer text-xs flex items-center gap-1"
           >
-            <span>Önizle</span>
+            <span>Canlı Önizle</span>
           </button>
 
           {/* QR Code for Mobile */}
           {isPWA && (
             <button
               onClick={() => onOpenQR(app)}
-              title="Mobil Cihaz İçin QR Kod"
+              title="Mobil Cihaz İçin Gerçek QR Kod"
               className="p-2 text-slate-400 hover:text-white bg-slate-800/70 hover:bg-slate-800 rounded-xl transition cursor-pointer"
             >
               <QrCode className="w-4 h-4" />
             </button>
           )}
 
-          {/* Primary Action */}
-          {isUpcoming ? (
+          {/* Primary Action Button */}
+          {!statusMeta.isAvailableNow ? (
             <button
               onClick={() => onOpenWaitlist(app)}
-              className="px-3.5 py-2 text-xs font-semibold text-violet-300 bg-violet-950/70 hover:bg-violet-900 border border-violet-500/30 rounded-xl transition cursor-pointer flex items-center gap-1.5"
+              className="px-3.5 py-2 text-xs font-semibold text-amber-300 bg-amber-950/60 hover:bg-amber-900/80 border border-amber-500/30 rounded-xl transition cursor-pointer flex items-center gap-1.5"
             >
-              <Sparkles className="w-3.5 h-3.5 text-violet-400" />
-              <span>Erken Erişim</span>
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <span>{statusMeta.cardActionText}</span>
             </button>
           ) : isExtension ? (
             <a
@@ -170,7 +167,7 @@ export const AppCard: React.FC<AppCardProps> = ({
               rel="noopener noreferrer"
               className="px-3.5 py-2 text-xs font-semibold text-slate-950 bg-cyan-400 hover:bg-cyan-300 rounded-xl transition cursor-pointer flex items-center gap-1.5 shadow-sm"
             >
-              <span>Chrome Store</span>
+              <span>Chrome Eklentisi</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </a>
           ) : (
@@ -178,7 +175,7 @@ export const AppCard: React.FC<AppCardProps> = ({
               onClick={() => onOpenDetails(app)}
               className="px-3.5 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-xl transition cursor-pointer flex items-center gap-1.5 shadow-md shadow-indigo-600/20"
             >
-              <span>Yükle & Aç</span>
+              <span>{statusMeta.cardActionText}</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </button>
           )}

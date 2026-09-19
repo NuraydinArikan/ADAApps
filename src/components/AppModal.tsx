@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppItem } from '../types';
 import { AppIcon } from './AppIcon';
 import { AppMockupPreview } from './AppMockupPreview';
 import { PWAInstallGuide } from './PWAInstallGuide';
 import { QRCodeDisplay } from './QRCodeDisplay';
+import { getAppStatusMeta } from '../utils/statusMeta';
 import { 
   X, 
   ExternalLink, 
@@ -12,14 +13,15 @@ import {
   CheckCircle2, 
   Calendar, 
   Sparkles, 
-  Star, 
-  Share2, 
   Copy, 
   Check,
   Zap,
-  Info,
   QrCode,
-  Smartphone
+  Lock,
+  Server,
+  Database,
+  UserCheck,
+  Share2
 } from 'lucide-react';
 
 interface AppModalProps {
@@ -28,16 +30,31 @@ interface AppModalProps {
   onClose: () => void;
   onOpenWaitlist: (app: AppItem) => void;
   onOpenQR: (app: AppItem) => void;
+  onNavigateToPage?: (app: AppItem) => void;
 }
 
 export const AppModal: React.FC<AppModalProps> = ({
   app,
   isOpen,
   onClose,
-  onOpenWaitlist
+  onOpenWaitlist,
+  onNavigateToPage
 }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'install' | 'qr' | 'changelog'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'privacy' | 'install' | 'qr' | 'changelog'>('overview');
   const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen || !app) return null;
 
@@ -47,12 +64,25 @@ export const AppModal: React.FC<AppModalProps> = ({
     setTimeout(() => setCopiedLink(false), 2000);
   };
 
+  const handleCopyPermalink = () => {
+    const permalink = `${window.location.origin}${window.location.pathname}#${app.id}`;
+    navigator.clipboard.writeText(permalink);
+    setCopiedShare(true);
+    setTimeout(() => setCopiedShare(false), 2000);
+  };
+
   const isPWA = app.platform === 'pwa';
-  const isUpcoming = app.status === 'in_development' || app.status === 'concept';
+  const statusMeta = getAppStatusMeta(app.status);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`app-title-${app.id}`}
         className="relative w-full max-w-4xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden max-h-[92vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -65,16 +95,16 @@ export const AppModal: React.FC<AppModalProps> = ({
 
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
-                <h2 className="text-lg sm:text-xl font-bold text-white font-display">
+                <h2 id={`app-title-${app.id}`} className="text-lg sm:text-xl font-bold text-white font-display">
                   {app.name}
                 </h2>
-                <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-slate-800 text-slate-300 border border-slate-700">
-                  {app.badgeText || (isPWA ? 'PWA' : 'Tarayıcı Aracı')}
+                <span className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${statusMeta.badgeClass}`}>
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${statusMeta.dotClass} mr-1.5`}></span>
+                  {statusMeta.label}
                 </span>
-                {app.rating && (
-                  <span className="flex items-center gap-1 text-xs text-amber-400 font-semibold">
-                    <Star className="w-3.5 h-3.5 fill-amber-400" />
-                    <span>{app.rating}</span>
+                {app.verifiedBadge && (
+                  <span className="text-xs px-2.5 py-0.5 rounded-full font-medium bg-emerald-950/40 text-emerald-300 border border-emerald-500/30">
+                    {app.verifiedBadge}
                   </span>
                 )}
               </div>
@@ -86,13 +116,37 @@ export const AppModal: React.FC<AppModalProps> = ({
 
           {/* Quick Header Actions */}
           <div className="flex items-center gap-2 self-end sm:self-center">
-            {isUpcoming ? (
+            {/* Share permalink */}
+            <button
+              onClick={handleCopyPermalink}
+              title="Ürün Sayfası Bağlantısını Kopyala"
+              className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl text-xs font-medium transition cursor-pointer flex items-center gap-1.5"
+            >
+              {copiedShare ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Share2 className="w-3.5 h-3.5" />}
+              <span className="hidden sm:inline">{copiedShare ? 'Kopyalandı' : 'Paylaş'}</span>
+            </button>
+
+            {onNavigateToPage && (
+              <button
+                onClick={() => {
+                  onClose();
+                  onNavigateToPage(app);
+                }}
+                title="Ayrıntılı Ürün Sayfasına Git"
+                className="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-indigo-300 hover:text-white rounded-xl text-xs font-medium transition cursor-pointer flex items-center gap-1.5 border border-indigo-500/30"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden sm:inline">Ürün Sayfası</span>
+              </button>
+            )}
+
+            {!statusMeta.isAvailableNow ? (
               <button
                 onClick={() => onOpenWaitlist(app)}
-                className="px-4 py-2 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-md"
+                className="px-4 py-2 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-md"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>Erken Erişime Katıl</span>
+                <span>Erken Erişim Listesine Katıl</span>
               </button>
             ) : app.platform === 'desktop' ? (
               <a
@@ -111,7 +165,7 @@ export const AppModal: React.FC<AppModalProps> = ({
                 rel="noopener noreferrer"
                 className="px-4 py-2 bg-cyan-400 hover:bg-cyan-300 text-slate-950 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 shadow-md"
               >
-                <span>Chrome Web Store</span>
+                <span>Chrome Store</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             ) : (
@@ -149,6 +203,18 @@ export const AppModal: React.FC<AppModalProps> = ({
             Genel Bakış & Simülasyon
           </button>
 
+          <button
+            onClick={() => setActiveTab('privacy')}
+            className={`py-3 px-3 font-semibold border-b-2 transition whitespace-nowrap cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'privacy'
+                ? 'border-indigo-500 text-indigo-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>Şeffaf Gizlilik Mimarisi</span>
+          </button>
+
           {isPWA && (
             <button
               onClick={() => setActiveTab('install')}
@@ -173,7 +239,7 @@ export const AppModal: React.FC<AppModalProps> = ({
               }`}
             >
               <QrCode className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Mobil QR Kod</span>
+              <span>Mobil Gerçek QR</span>
             </button>
           )}
 
@@ -224,7 +290,7 @@ export const AppModal: React.FC<AppModalProps> = ({
                     <Layers className="w-3.5 h-3.5 text-indigo-400" />
                     İnteraktif Arayüz Önizlemesi
                   </h4>
-                  <span className="text-[11px] text-slate-500">Canlı Prototip</span>
+                  <span className="text-[11px] text-slate-500">Çalışır Prototip Simülasyonu</span>
                 </div>
                 <AppMockupPreview app={app} />
               </div>
@@ -247,28 +313,6 @@ export const AppModal: React.FC<AppModalProps> = ({
                 </div>
               </div>
 
-              {/* Privacy & Security Highlights */}
-              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                  <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                  Güvenlik & Kullanıcı Hakları Güvencesi
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {app.privacyHighlights.map((highlight, idx) => (
-                    <span
-                      key={idx}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
-                    >
-                      <Check className="w-3 h-3 text-emerald-400" />
-                      {highlight}
-                    </span>
-                  ))}
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-xs">
-                    Son güncelleme: {app.lastUpdated}
-                  </span>
-                </div>
-              </div>
-
               {/* Tech Stack */}
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
@@ -283,6 +327,87 @@ export const AppModal: React.FC<AppModalProps> = ({
                       {tech}
                     </span>
                   ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Transparent Privacy Architecture Tab */}
+          {activeTab === 'privacy' && (
+            <div className="space-y-6">
+              <div className="bg-slate-950/70 border border-indigo-900/30 rounded-2xl p-5">
+                <div className="flex items-center gap-2 mb-2 text-indigo-300 font-bold text-sm">
+                  <ShieldCheck className="w-5 h-5 text-indigo-400" />
+                  <span>Şeffaf Gizlilik Mimarisi — Doğru Veri Ayrımı</span>
+                </div>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  ADAApps, abartılı sloganlar yerine her uygulamanın veriyi nerede işlediğini, hangi sunucu ve dış servislere başvurduğunu açıkça beyan eder.
+                </p>
+              </div>
+
+              {app.privacyArchitecture && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+                      <Database className="w-4 h-4 text-emerald-400" />
+                      <span>1. Cihaz İçi / Yerel Veri</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {app.privacyArchitecture.localData}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+                      <Server className="w-4 h-4 text-blue-400" />
+                      <span>2. Sunucu & Senkronizasyon</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {app.privacyArchitecture.serverSync}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+                      <Zap className="w-4 h-4 text-amber-400" />
+                      <span>3. Yapay Zeka & Dış API</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {app.privacyArchitecture.aiExternalApi}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-1.5">
+                    <div className="flex items-center gap-2 text-xs font-bold text-slate-200">
+                      <UserCheck className="w-4 h-4 text-purple-400" />
+                      <span>4. Hesap Zorunluluğu</span>
+                    </div>
+                    <p className="text-xs text-slate-300 leading-relaxed">
+                      {app.privacyArchitecture.accountRequired}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Highlights */}
+              <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
+                  <Lock className="w-4 h-4 text-emerald-400" />
+                  Kullanıcı Hakları & Taahhütler
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {app.privacyHighlights.map((highlight, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs font-medium"
+                    >
+                      <Check className="w-3 h-3 text-emerald-400" />
+                      {highlight}
+                    </span>
+                  ))}
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-slate-900 border border-slate-800 text-slate-400 text-xs">
+                    Doğrulama Tarihi: {app.lastUpdated}
+                  </span>
                 </div>
               </div>
             </div>
@@ -342,7 +467,7 @@ export const AppModal: React.FC<AppModalProps> = ({
           </div>
 
           <div className="flex items-center gap-2">
-            <span className="text-[11px] text-slate-500">ADA Product Studio Dağıtımı</span>
+            <span className="text-[11px] text-slate-500">ADA Independent Product Studio</span>
             <button
               onClick={onClose}
               className="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition cursor-pointer"

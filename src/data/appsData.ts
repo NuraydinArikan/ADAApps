@@ -15,17 +15,16 @@ export const INITIAL_APPS: AppItem[] = [
     iconName: 'WalletCards',
     accentColor: 'from-emerald-500 to-teal-700',
     previewAccent: 'emerald',
-    badgeText: 'Canlı • 17 Modül & Mutfak Masası AI',
+    badgeText: 'Canlı PWA • 17 Modül & Gemini AI',
     features: [
       '17 Kapsamlı Ev Modülü: Bütçe, Market Listesi, Diyet/Kalori, Gardırop, Araç Bakımı, Abonelikler, Enerji/Su Tasarrufu ve Kütüphane.',
       'Mutfak Masası (Gemini AI): Her sekmede bağlama duyarlı yapay zeka desteği, fatura fotoğrafından otomatik harcama kaydı ve tasarruf tüyoları.',
       'Bireysel ve Aile (Grup) Modu: Aile fertleriyle şifreli ve senkronize bütçe yönetimi.',
       'Uçtan Uca Şifreli & Yerel Öncelikli: Hassas harcama ve aile kayıtları sunucuya açık metin olarak gitmez.',
-      'Pro Katman Desteği: Lemon Squeezy entegrasyonu ile aylık 49 TL esnek yükseltme seçeneği.'
+      'Pro Katman Desteği: Lemon Squeezy entegrasyonu ile esnek yükseltme seçeneği.'
     ],
     techStack: ['PWA', 'Vanilla JS', 'Firebase Realtime DB', 'Cloud Functions', 'Google Gemini API', 'Lemon Squeezy'],
-    rating: 4.9,
-    installCountLabel: '3.200+ Aile',
+    verifiedBadge: 'Doğrulanmış PWA',
     lastUpdated: 'Ağustos 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -33,6 +32,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Aile Verileri Uçtan Uca Şifreli',
       'Sıfır Üçüncü Parti Veri Madenciliği'
     ],
+    privacyArchitecture: {
+      localData: 'Cihaz içi IndexedDB & LocalStorage (Şifreli harcama kayıtları)',
+      serverSync: 'Firebase Realtime DB (Uçtan uca şifreli aile paylaşımı)',
+      aiExternalApi: 'Google Gemini API (Sadece Mutfak Masası fiş/tavsiye istendiğinde)',
+      accountRequired: 'Opsiyonel (Tekil cihazda hesapsız çalışır, aile modu için e-posta)'
+    },
     changelog: [
       {
         version: 'v109 (Son Sürüm)',
@@ -61,7 +66,7 @@ export const INITIAL_APPS: AppItem[] = [
     iconName: 'Guitar',
     accentColor: 'from-amber-500 to-rose-600',
     previewAccent: 'amber',
-    badgeText: 'Canlı • Canlı Akustik Sentez & Senkron Söz',
+    badgeText: 'Canlı PWA • Karplus-Strong Sentezi',
     features: [
       'Karplus-Strong Akustik Sentez: Önceden kaydedilmiş ses dosyası değil, teli titreten canlı algoritmik gitar sesi.',
       'Çok Cihazlı "Halka" Senkronizasyonu: WebSocket ile tek bir lider çalar, tüm arkadaşların ekranında şarkı sözleri aynı anda akar.',
@@ -70,8 +75,7 @@ export const INITIAL_APPS: AppItem[] = [
       'Zengin Ambiyans Sistemi: 13 konum × 6 ruh hali × 5 hava durumu (kamp ateşi çıtırtısı, kumsal dalgası, yağmur eşliği).'
     ],
     techStack: ['PWA', 'React 19', 'Vite 6', 'TypeScript', 'Web Audio API', 'WebSocket', 'Render', 'Neon Postgres', 'Gemini'],
-    rating: 4.9,
-    installCountLabel: '2.800+ Müziksever',
+    verifiedBadge: 'Doğrulanmış PWA',
     lastUpdated: 'Ağustos 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -79,6 +83,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Parolasız HMAC İmzalı Güvenli Oturum',
       'Anonim Katılımcı Deneyimi'
     ],
+    privacyArchitecture: {
+      localData: 'Tarayıcı önbelleği (Web Audio ses sentez algoritmaları ve ayarlar)',
+      serverSync: 'WebSocket & Render (Yalnızca canlı halka akor/söz eşitleme oturum ID\'si)',
+      aiExternalApi: 'LRCLIB API (Şarkı sözleri) & Opsiyonel Gemini akor analizi',
+      accountRequired: 'Gerektirmez (Anonim takma adla halkaya anında katılım)'
+    },
     changelog: [
       {
         version: 'v1.2.0',
@@ -96,7 +106,7 @@ export const INITIAL_APPS: AppItem[] = [
   {
     id: 'openguard',
     name: 'OpenGuard',
-    tagline: 'VPN\'siz Halka Açık Ağlarda Windows 11 Sistem Sertleştirmesi',
+    tagline: 'Halka Açık Ağlarda Windows 11 Sistem Sertleştirmesi',
     description: 'Kafe, havaalanı ve ortak Wi-Fi ağlarında trafiği yavaşlatan VPN\'lere gerek kalmadan; uyarlanabilir güvenlik duvarı kuralları, DNS-over-HTTPS (DoH) ve süreç/ağ izleme ile Windows 11 sisteminizin saldırı yüzeyini daraltan masaüstü güvenlik aracı.',
     problem: 'Halka açık ortak Wi-Fi ağlarında aynı yerel ağdaki cihazlar saldırı yüzeyi oluşturur. Geleneksel VPN\'ler internet hızını düşürürken yerel ağdaki SMB/NetBIOS ve açık port tehditlerini her zaman engellemez.',
     solution: 'Trafiği şifrelemek yerine doğrudan Windows 11 işletim sistemini sertleştirir. Tek tıkla açık dinleme portlarını kapatır, DNS-over-HTTPS zorlar ve şüpheli arka plan süreçlerini yerel SQLite/JSONL kayıtlarıyla anlık denetler.',
@@ -116,6 +126,7 @@ export const INITIAL_APPS: AppItem[] = [
       'Inno Setup Kurulum Paketi: Yönetici yetkili 4 ekranlı sade kurulum sihirbazı.'
     ],
     techStack: ['Python 3.12', 'PyQt6', 'PowerShell Subprocess IPC', 'SQLite', 'JSONL Event Log', 'Inno Setup'],
+    verifiedBadge: 'Açık Kaynak Kodlu',
     lastUpdated: 'Ağustos 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -123,6 +134,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Tamamen Yerel Cihazda Çalışır',
       'Açık Kaynak Kod Şeffaflığı'
     ],
+    privacyArchitecture: {
+      localData: 'Yerel SQLite ve JSONL dosyaları (Kendi makinenizde saklanır)',
+      serverSync: 'Yok (Sıfır dış sunucu bağlantısı)',
+      aiExternalApi: 'Yok',
+      accountRequired: 'Gerektirmez (Yönetici yetkili yerel masaüstü aracı)'
+    },
     changelog: [
       {
         version: 'v0.7.0 Alpha',
@@ -151,7 +168,7 @@ export const INITIAL_APPS: AppItem[] = [
     iconName: 'BellRing',
     accentColor: 'from-amber-500 to-orange-600',
     previewAccent: 'amber',
-    badgeText: 'PWA • Anlık Takip & Alarm',
+    badgeText: 'Canlı PWA • Anlık Takip & Alarm',
     features: [
       'Akıllı URL & Fiyat Takibi: İlgilendiğiniz ürün, bilet veya duyuru sayfasını ekleyin, periyodik olarak sessizce denetlensin.',
       'Doğrudan Web Push Bildirimi: E-posta kalabalığına boğulmadan, koşul sağlandığında anında telefonunuza ve saatinize uyarı düşer.',
@@ -160,8 +177,7 @@ export const INITIAL_APPS: AppItem[] = [
       'Gizli & Mahrem İzleme: Hangi sayfaları izlediğiniz hiçbir merkezi sunucuya gitmez, cihazınızın yerelinde şifreli tutulur.'
     ],
     techStack: ['PWA', 'Web Push API', 'Service Worker', 'Background Sync', 'IndexedDB', 'Tailwind CSS'],
-    rating: 4.9,
-    installCountLabel: '3.800+ Aktif İzleyici',
+    verifiedBadge: 'Doğrulanmış PWA',
     lastUpdated: 'Eylül 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -169,6 +185,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Kişisel Veri ve Çerez Taraması Yok',
       'Sıfır Reklam & İzleyicisiz'
     ],
+    privacyArchitecture: {
+      localData: 'Yerel IndexedDB (İzlediğiniz URL listesi ve eşik kuralları)',
+      serverSync: 'Web Push Sunucusu (Şifreli bildirim aboneliği endpoint\'i)',
+      aiExternalApi: 'Yok',
+      accountRequired: 'Gerektirmez (Tarayıcı bildirim izni yeterlidir)'
+    },
     changelog: [
       {
         version: 'v1.8.0',
@@ -187,7 +209,7 @@ export const INITIAL_APPS: AppItem[] = [
     id: 'algorithmless',
     name: 'Algorithmless',
     tagline: 'Algoritma Değil, Sen Seç: Yankı Odası Karşıtı Medya Platformu',
-    description: 'Aynı gündem maddesini farklı platformlardan (YouTube, X, bağımsız medya, podcast) ve farklı siyasi perspektiflerden (muhalif, iktidar, bağımsız, uluslararası, merkez) yan yana sunarak sizi tek bir algoritmanın yankı odasından çıkaran medya küratörlüğü.',
+    description: 'Aynı gündem maddesini farklı platformlardan (YouTube, X, bağımsız medya, podcast) ve farklı perspektiflerden yan yana sunarak sizi tek bir algoritmanın filtre balonundan çıkaran bağımsız medya küratörlüğü.',
     problem: 'Sosyal medya algoritmaları etkileşimi artırmak için kullanıcıları kutuplaştırır, yanlı içeriklerle besler ve karşıt fikirleri görünmez kılan filtre balonlarına hapseder.',
     solution: 'Kişiselleştirme yerine kasıtlı çeşitlilik sunar. "Matris Görünümü" ile konuları platform ve perspektif ekseninde karşılaştırır; "Çarkıfelek Görünümü" ile farklı bakış açılarını keşfetmeyi oyunlaştırır. Katı "Çıplak Gerçek" 5N1K formatıyla dezenformasyonu eler.',
     category: 'journalism',
@@ -200,14 +222,13 @@ export const INITIAL_APPS: AppItem[] = [
     badgeText: 'Canlı PWA • Matris & Çarkıfelek',
     features: [
       'Matris Görünümü: Konu × platform tablosunda tüm perspektifleri tek bakışta kıyaslayın.',
-      'Çarkıfelek Görünümü: 2021\'deki orijinal oyunlaştırılmış tarafsız keşif arayüzü.',
+      'Çarkıfelek Görünümü: Oyunlaştırılmış tarafsız keşif arayüzü.',
       '"Çıplak Gerçek" Editoryal Formatı: Yorumsuz 5N1K olayı, Neden Önemli analizi ve Algoritmik Çarpıtma teşhisi.',
-      'Bilinçli Olarak Reklamsız: Medya okuryazarlığına adanmış, hibe ve üyelik odaklı bağımsız yapı.',
+      'Bilinçli Olarak Reklamsız: Medya okuryazarlığına adanmış bağımsız editoryal yapı.',
       'Hafif Tek Dosyalık PWA: GitHub Pages üzerinde ışık hızında açılan, sıfır izleyicili deneyim.'
     ],
     techStack: ['PWA', 'Vanilla JS (Tek Dosya)', 'Supabase Headless CMS', 'Service Worker', 'GitHub Pages', 'Plausible Analytics'],
-    rating: 4.8,
-    installCountLabel: '2.100+ Okur',
+    verifiedBadge: 'Açık Kaynak PWA',
     lastUpdated: 'Ağustos 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -215,6 +236,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Algoritmik Manipülasyon Yok',
       'Reklamsız ve Şeffaf Kaynaklandırma'
     ],
+    privacyArchitecture: {
+      localData: 'Tarayıcı oturum belleği',
+      serverSync: 'GitHub Pages & Supabase (Yalnızca kamuya açık editoryal içerik okunur)',
+      aiExternalApi: 'Yok',
+      accountRequired: 'Gerektirmez (Tamamen açık ve reklamsız okuma)'
+    },
     changelog: [
       {
         version: 'v1.4.0',
@@ -233,9 +260,9 @@ export const INITIAL_APPS: AppItem[] = [
     id: 'lesstoken',
     name: 'Less Token',
     tagline: 'Görsel, PDF ve Metinlerde %95\'e Varan LLM Token Tasarrufu',
-    description: 'Görsel, PDF, Word, CSV ve metinleri ChatGPT, Claude, Gemini veya DeepSeek\'e göndermeden önce akıllıca sıkıştırıp özetleyen; API maliyetlerinizi ve prompt kotalarınızı radikal biçimde düşüren araç seti.',
+    description: 'Görsel, PDF, Word, CSV ve metinleri ChatGPT, Claude, Gemini veya DeepSeek\'e göndermeden önce akıllıca sıkıştırıp özetleyen; API maliyetlerinizi ve prompt kotalarınızı radikal biçimde düşüren geliştirici aracı.',
     problem: 'Yapay zeka modellerine 4000×2500px ham görsel veya 50 sayfalık taranmış PDF göndermek on binlerce gereksiz token tüketir, API faturalarını kabartır ve context penceresini doldurur.',
-    solution: 'Görselleri okunurluk kaybı olmadan 5KB\'a kadar optimize eder; PDF/CSV dokümanlarını anlamsal olarak ayıklar. Chrome MV3 eklentisi, Next.js web uygulaması ve Windows masaüstü aracıyla geliştiricilere tam tasarruf sağlar.',
+    solution: 'Görselleri okunurluk kaybı olmadan optimize eder; PDF/CSV dokümanlarını anlamsal olarak ayıklar. Chrome MV3 eklentisi ve web uygulamasıyla geliştiricilere token tasarrufu sağlar.',
     category: 'ai_tools',
     platform: 'chrome_extension',
     status: 'in_development',
@@ -245,13 +272,14 @@ export const INITIAL_APPS: AppItem[] = [
     previewAccent: 'sky',
     badgeText: 'Aktif Geliştirme • Chrome Ext & Web',
     features: [
-      'Görsel Optimizasyonu: 4000×2500px görselleri LLM için optimize ederek 5KB\'a kadar indirgeme.',
+      'Görsel Optimizasyonu: Yüksek çözünürlüklü görselleri LLM için optimize ederek 5KB\'a kadar indirgeme.',
       'PDF & CSV Derin Sıkıştırma: 50 sayfalık teknik dokümanlarda %95\'e varan context tasarrufu.',
       'Chrome Manifest V3 Eklentisi: ChatGPT ve Claude arayüzünde dosya yüklerken doğrudan tek tıkla sıkıştırma.',
       'Kendi Anahtarını Getir (BYOK): API anahtarlarınız yalnızca kendi tarayıcınızda saklanır.',
       'Railway Flask Backend: Yüksek hızlı belge ayrıştırma mikroservisi (pdfjs-dist, mammoth).'
     ],
     techStack: ['Next.js 14', 'React 18', 'Python Flask', 'Railway', 'Chrome Extension MV3', 'Tailwind CSS'],
+    verifiedBadge: 'Chrome MV3 & Web',
     lastUpdated: 'Ağustos 2026',
     isFeatured: true,
     privacyHighlights: [
@@ -259,6 +287,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Yerel Tarayıcıda Sıkıştırma Önceliği',
       'API Anahtarları Cihazınızda Kalır'
     ],
+    privacyArchitecture: {
+      localData: 'Tarayıcı yerel belleği & BYOK (Kendi API anahtarınız sunucuya gitmez)',
+      serverSync: 'Railway Flask mikroservisi (Yalnızca yüklenen PDF/CSV ayrıştırma esnasında RAM\'de işlenir, saklanmaz)',
+      aiExternalApi: 'Kullanıcının kendi LLM sağlayıcısı (OpenAI / Anthropic / Gemini)',
+      accountRequired: 'Gerektirmez (Doğrudan araç kullanımı)'
+    },
     changelog: [
       {
         version: 'v1.0.1 (Hazır Paket)',
@@ -282,12 +316,12 @@ export const INITIAL_APPS: AppItem[] = [
     solution: 'Bilinçli olarak "tıbbi bir tedavi" değil, insan insana bir "akran destek ağı" olarak tasarlandı. Web Audio API ile kullanıcının ses tonunu gerçek zamanlı maskeler, WebRTC ile doğrudan eşler arasında (P2P) uçtan uca şifreli ses hattı kurar; sunucu görüşme içeriğini asla duymaz.',
     category: 'therapy',
     platform: 'pwa',
-    status: 'in_development',
+    status: 'beta',
     url: 'https://koza.app',
     iconName: 'HeartPulse',
     accentColor: 'from-teal-500 to-emerald-700',
     previewAccent: 'teal',
-    badgeText: 'Geliştiriliyor • Yolun Başında / Prototip',
+    badgeText: 'Açık Beta • P2P Ses Maskeleme',
     features: [
       'Gerçek Zamanlı Ses Maskeleme: <50ms gecikmeli Web Audio API formant shifting ile sesiniz tanınmaz hale gelir.',
       'Anlamsal (Semantik) Eşleştirme: Yaş/cinsiyet yerine duygu durumu onboarding cevaplarının OpenAI embeddings benzerliğine göre eşleşme.',
@@ -296,6 +330,7 @@ export const INITIAL_APPS: AppItem[] = [
       'Zaman Ayarlı Kendini İmha: Görüşme sona erdiğinde tüm geçici oturum verileri anında silinir.'
     ],
     techStack: ['React 18', 'TypeScript', 'Vite', 'Web Audio API', 'WebRTC (P2P + TURN)', 'Supabase pgvector', 'OpenAI Embeddings'],
+    verifiedBadge: 'Açık Beta PWA',
     lastUpdated: 'Ağustos 2026',
     isFeatured: false,
     privacyHighlights: [
@@ -303,9 +338,15 @@ export const INITIAL_APPS: AppItem[] = [
       'Sunucu Görüşmeyi Asla Dinleyemez',
       'Tıbbi Kayıt Tutulmaz, Mutlak Anonimlik'
     ],
+    privacyArchitecture: {
+      localData: 'Web Audio API ses maskeleme parametreleri (Cihaz üzerinde çalışır)',
+      serverSync: 'Supabase pgvector (Duygu eşleşmesi) & WebRTC P2P (Eşten eşe şifreli ses)',
+      aiExternalApi: 'OpenAI Embeddings (Yalnızca anonim duygu eşleştirme vektörü için)',
+      accountRequired: 'Gerektirmez (Tek kullanımlık anonim takma ad)'
+    },
     changelog: [
       {
-        version: 'v0.3.0 (Alfa)',
+        version: 'v0.3.0 (Beta)',
         date: 'Ağustos 2026',
         notes: ['Ses maskeleyici formant algoritması ve semantik pgvector eşleşmesi kodlandı', 'WebRTC TURN bağlantı katmanı test edildi']
       },
@@ -322,7 +363,7 @@ export const INITIAL_APPS: AppItem[] = [
     name: 'KahveApps',
     tagline: 'Semtinin Kahve Kartı — Hepsi Tek Uygulamada',
     description: 'Bir semtteki tüm bağımsız 3. nesil kahvecileri tek bir müşteri uygulamasında buluşturan dijital sadakat platformu. Kullanıcı her kahvecide dijital damga toplar (10 kahveye 1 bedava), tüm kartlarını tek cüzdanda görür.',
-    problem: 'Bağımsız kahveciler dev zincirler gibi 300.000 TL harcayıp özel mobil sadakat uygulaması yaptıramaz; müşteriler ise cüzdanlarında taşımaktan bıktıkları veya kaybettikleri kağıt damga kartlarından sıkılmıştır.',
+    problem: 'Bağımsız kahveciler dev zincirler gibi yüksek bütçeli özel mobil sadakat uygulaması yaptıramaz; müşteriler ise cüzdanlarında taşımaktan bıktıkları veya kaybettikleri kağıt damga kartlarından sıkılmıştır.',
     solution: 'Bağımsız kahveciye zincir kalitesinde müşteri sadakat altyapısı, anlık push bildirim kanalı ve QR damga sistemi sunar. Kullanıcı semtteki tüm kahve kartlarını tek bir PWA cüzdanında yönetir; "Kampanya Radarı" ile yerel kahve fırsatlarını keşfeder.',
     category: 'loyalty',
     platform: 'pwa',
@@ -331,7 +372,7 @@ export const INITIAL_APPS: AppItem[] = [
     iconName: 'Coffee',
     accentColor: 'from-amber-600 to-amber-900',
     previewAccent: 'amber',
-    badgeText: 'Prototip • Ankara Pilot Doğrulaması',
+    badgeText: 'Konsept • Ankara Pilot Doğrulaması',
     features: [
       'Tek Dijital Damga Cüzdanı: Semtteki tüm bağımsız kahvecilerin "10 damgaya 1 hediye" kartları tek ekranda.',
       '3 Saniyede Barista QR Modu: Yoğun saatlerde kasayı yavaşlatmayan dinamik sunucu imzalı QR okutma.',
@@ -340,6 +381,7 @@ export const INITIAL_APPS: AppItem[] = [
       'Ankara Pilot Bölgesi: Tunalı–Esat–Arjantin hattında 20 kahveci saha doğrulaması.'
     ],
     techStack: ['PWA', 'Expo / Web', 'Supabase', 'NetGSM SMS OTP', 'Dynamic QR Code Engine', 'Tailwind CSS'],
+    verifiedBadge: 'Pilot Tasarım',
     lastUpdated: 'Temmuz 2026',
     isFeatured: false,
     privacyHighlights: [
@@ -347,6 +389,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Müşteri Verisi Üçüncü Taraflarla Paylaşılmaz',
       'Yalnızca Dijital Damga Cüzdanı'
     ],
+    privacyArchitecture: {
+      localData: 'Yerel cüzdan önbelleği & damga durumu',
+      serverSync: 'Supabase & Dinamik QR motoru (Barista damga onayı)',
+      aiExternalApi: 'Yok',
+      accountRequired: 'Opsiyonel (SMS OTP ile telefon numarası doğrulama)'
+    },
     changelog: [
       {
         version: 'v0.2.0 (Prototip)',
@@ -360,7 +408,7 @@ export const INITIAL_APPS: AppItem[] = [
     id: 'projectfn',
     name: 'Project FN',
     tagline: 'Haber, Doğrulanabilir ve İlişkilendirilebilir Bir Bilgi Nesnesidir',
-    description: 'Türkiye haberciliğinin hız ve hacim odaklı doğrulama zafiyetini hedef alan; 30+ yıllık araştırmacı gazetecilik birikimiyle (Nuraydın, Nurullah, İdris Arıkan) geliştirilen yeni nesil doğrulanabilir haber ve medya şeffaflık platformu.',
+    description: 'Türkiye haberciliğinin hız ve hacim odaklı doğrulama zafiyetini hedef alan; 30+ yıllık araştırmacı gazetecilik birikimiyle geliştirilen yeni nesil doğrulanabilir haber ve medya şeffaflık platformu.',
     problem: 'Geleneksel ve dijital medyada haberler teyit edilmeden, kaynak gösterilmeden ve sansasyon amaçlı yayılır. Okur hangi bilginin belgeye dayandığını, hangi iddianın taraflarca doğrulandığını bilemez.',
     solution: 'Her haberi "Doğrulama Karnesi" ile yayınlar (kaynak, resmi belge, uzman ve taraf görüşü sayımı elle doldurulamaz). Olay Kronolojisi ile haberin kök nedenini gösterir ve "Bu haberi kim nasıl verdi" modülüyle medya organlarının dili arasındaki farkı tarafsızca ortaya koyar.',
     category: 'journalism',
@@ -374,11 +422,12 @@ export const INITIAL_APPS: AppItem[] = [
     features: [
       'Otomatik Doğrulama Karnesi: Her haberin altında kaynak, resmi evrak, tanık ve taraf görüşü sayısı objektif olarak karnelenir.',
       'Olay Kronolojisi: Gelişen olayların adım adım doğrulanmış zaman çizelgesi.',
-      '"Bu Haberi Kim Nasıl Verdi?": Farklı medya kanallarının haberi ele alış üslubunu ve manşetlerini karşılaştıran Ground News benzeri Türkçe analiz.',
+      '"Bu Haberi Kim Nasıl Verdi?": Farklı medya kanallarının haberi ele alış üslubunu ve manşetlerini karşılaştıran analiz.',
       'Çoklu Okuma Modları: 60 saniyelik brifing, derinlemesine araştırma dosyası ve sesli dinleme seçenekleri.',
       '30+ Yıllık Gazetecilik Deneyimi: Kıdemli araştırmacı gazetecilerin metodolojisiyle şekillenen editoryal omurga.'
     ],
     techStack: ['Next.js 15 (App Router)', 'React 19', 'TypeScript', 'Supabase Postgres', 'Claude API (Planlı)', 'Tailwind CSS'],
+    verifiedBadge: 'Araştırma & MVP',
     lastUpdated: 'Ağustos 2026',
     isFeatured: false,
     privacyHighlights: [
@@ -386,6 +435,12 @@ export const INITIAL_APPS: AppItem[] = [
       'Açık Metodoloji ve Kaynak Belirtme Şartı',
       'Okur Profili Çıkartılmaz'
     ],
+    privacyArchitecture: {
+      localData: 'Tarayıcı okuma tercihleri',
+      serverSync: 'Supabase Postgres (Doğrulanmış haber kayıtları ve karneler)',
+      aiExternalApi: 'Claude API (Planlı - yalnızca kaynak teyit metin analizi için)',
+      accountRequired: 'Gerektirmez (Kamusal şeffaf haber arşivi)'
+    },
     changelog: [
       {
         version: 'v0.3.0 (Demo MVP)',

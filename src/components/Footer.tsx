@@ -20,7 +20,7 @@ export const Footer: React.FC<FooterProps> = ({ onOpenStory, onOpenCreatorStudio
           />
 
           <p className="text-slate-400 max-w-md leading-relaxed text-xs">
-            Bağımsız bir dijital ürün stüdyosu. Şeffaf, reklamsız, gizlilik odaklı ve tekel uygulama mağazalarının bürokrasisine takılmadan doğrudan dağıtılan zanaatkar yazılımlar.
+            Bağımsız bir dijital ürün stüdyosu. Şeffaf, reklamsız, gizlilik odaklı ve modern web standartlarıyla doğrudan dağıtılan zanaatkar yazılımlar.
           </p>
 
           <div className="flex items-center gap-1.5 text-indigo-400 font-medium">

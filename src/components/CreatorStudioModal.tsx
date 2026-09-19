@@ -1,17 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { AppItem, AppCategory, AppPlatform, AppStatus } from '../types';
+import { getAppStatusMeta } from '../utils/statusMeta';
+import { getWaitlistSubmissions, isSupabaseConfigured } from '../lib/waitlistService';
 import { 
   X, 
   Plus, 
   Trash2, 
-  Save, 
+  Edit3, 
   RotateCcw, 
   Download, 
+  Upload, 
   Check, 
   Sliders, 
-  Layers, 
-  Sparkles,
-  Users
+  Users, 
+  FileText, 
+  AlertCircle,
+  Database,
+  Cloud
 } from 'lucide-react';
 
 interface CreatorStudioModalProps {
@@ -29,78 +34,185 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
   onSaveApps,
   onResetApps
 }) => {
-  const [activeTab, setActiveTab] = useState<'manage' | 'add' | 'waitlist'>('manage');
-  
-  // New App form state
-  const [newName, setNewName] = useState('');
-  const [newTagline, setNewTagline] = useState('');
-  const [newDesc, setNewDesc] = useState('');
-  const [newProblem, setNewProblem] = useState('');
-  const [newSolution, setNewSolution] = useState('');
-  const [newCategory, setNewCategory] = useState<AppCategory>('productivity');
-  const [newPlatform, setNewPlatform] = useState<AppPlatform>('pwa');
-  const [newStatus, setNewStatus] = useState<AppStatus>('live');
-  const [newUrl, setNewUrl] = useState('https://');
-  const [newTech, setNewTech] = useState('React, PWA, Tailwind');
-  const [newFeatures, setNewFeatures] = useState('Offline hazır, Hızlı senkronizasyon, Şifreli veri');
+  const [activeTab, setActiveTab] = useState<'manage' | 'form' | 'waitlist'>('manage');
+  const [editingAppId, setEditingAppId] = useState<string | null>(null);
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Waitlist data from localStorage
-  const waitlistData = React.useMemo(() => {
-    try {
-      return JSON.parse(localStorage.getItem('adaapps_waitlist') || '[]');
-    } catch {
-      return [];
+  // Form states (used for both Create and Edit)
+  const [formName, setFormName] = useState('');
+  const [formTagline, setFormTagline] = useState('');
+  const [formDesc, setFormDesc] = useState('');
+  const [formProblem, setFormProblem] = useState('');
+  const [formSolution, setFormSolution] = useState('');
+  const [formCategory, setFormCategory] = useState<AppCategory>('productivity');
+  const [formPlatform, setFormPlatform] = useState<AppPlatform>('pwa');
+  const [formStatus, setFormStatus] = useState<AppStatus>('live');
+  const [formUrl, setFormUrl] = useState('https://');
+  const [formTech, setFormTech] = useState('React, PWA, Tailwind');
+  const [formFeatures, setFormFeatures] = useState('Offline hazır, Hızlı senkronizasyon, Şifreli veri');
+  const [formUrlError, setFormUrlError] = useState<string | null>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  // Waitlist data state
+  const [waitlistData, setWaitlistData] = useState<any[]>([]);
+  const [isLoadingWaitlist, setIsLoadingWaitlist] = useState(false);
+  const supabaseActive = isSupabaseConfigured();
+
+  useEffect(() => {
+    if (isOpen && activeTab === 'waitlist') {
+      setIsLoadingWaitlist(true);
+      getWaitlistSubmissions()
+        .then((data) => setWaitlistData(data))
+        .catch(() => setWaitlistData([]))
+        .finally(() => setIsLoadingWaitlist(false));
     }
-  }, [isOpen]);
+  }, [isOpen, activeTab]);
 
   if (!isOpen) return null;
 
-  const handleCreateApp = (e: React.FormEvent) => {
+  const resetForm = () => {
+    setEditingAppId(null);
+    setFormName('');
+    setFormTagline('');
+    setFormDesc('');
+    setFormProblem('');
+    setFormSolution('');
+    setFormCategory('productivity');
+    setFormPlatform('pwa');
+    setFormStatus('live');
+    setFormUrl('https://');
+    setFormTech('React, PWA, Tailwind');
+    setFormFeatures('Offline hazır, Hızlı senkronizasyon, Şifreli veri');
+    setFormUrlError(null);
+  };
+
+  const handleStartEdit = (app: AppItem) => {
+    setEditingAppId(app.id);
+    setFormName(app.name);
+    setFormTagline(app.tagline);
+    setFormDesc(app.description);
+    setFormProblem(app.problem);
+    setFormSolution(app.solution);
+    setFormCategory(app.category);
+    setFormPlatform(app.platform);
+    setFormStatus(app.status);
+    setFormUrl(app.url);
+    setFormTech(app.techStack.join(', '));
+    setFormFeatures(app.features.join(', '));
+    setFormUrlError(null);
+    setActiveTab('form');
+  };
+
+  const handleStartCreate = () => {
+    resetForm();
+    setActiveTab('form');
+  };
+
+  const validateUrl = (urlStr: string): boolean => {
+    try {
+      const parsed = new URL(urlStr);
+      return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+      return false;
+    }
+  };
+
+  const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newName.trim()) return;
+    if (!formName.trim()) return;
 
-    const id = newName.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const created: AppItem = {
-      id: id || `app-${Date.now()}`,
-      name: newName.trim(),
-      tagline: newTagline.trim() || 'Yeni Nesil Bağımsız Uygulama',
-      description: newDesc.trim() || 'ADA Studio çatısı altında geliştirilen bağımsız yazılım aracı.',
-      problem: newProblem.trim() || 'Kullanıcıların karşılaştığı verimsizlik ve gereksiz karmaşa.',
-      solution: newSolution.trim() || 'Sade, hafif ve doğrudan tarayıcıda çalışan çözüm.',
-      category: newCategory,
-      platform: newPlatform,
-      status: newStatus,
-      url: newUrl.trim(),
-      iconName: newPlatform === 'pwa' ? 'Smartphone' : newPlatform === 'chrome_extension' ? 'Cpu' : 'Globe',
-      accentColor: 'from-indigo-500 to-purple-600',
-      previewAccent: 'indigo',
-      badgeText: newPlatform === 'pwa' ? 'PWA • Bağımsız' : 'Tarayıcı Aracı',
-      features: newFeatures.split(',').map((s) => s.trim()).filter(Boolean),
-      techStack: newTech.split(',').map((s) => s.trim()).filter(Boolean),
-      lastUpdated: 'Yeni Eklendi',
-      isFeatured: false,
-      privacyHighlights: ['Sıfır İzleyici', 'Yerel Depolama', 'Açık Standartlar'],
-      changelog: [
-        {
-          version: 'v1.0.0',
-          date: 'Yeni Sürüm',
-          notes: ['İlk lansman sürümü']
+    if (!validateUrl(formUrl.trim())) {
+      setFormUrlError('Lütfen geçerli bir URL girin (ör. https://ornek.app)');
+      return;
+    }
+    setFormUrlError(null);
+
+    const techArray = formTech.split(',').map((s) => s.trim()).filter(Boolean);
+    const featuresArray = formFeatures.split(',').map((s) => s.trim()).filter(Boolean);
+
+    if (editingAppId) {
+      // Edit existing app
+      const updated = apps.map((app) => {
+        if (app.id === editingAppId) {
+          return {
+            ...app,
+            name: formName.trim(),
+            tagline: formTagline.trim() || app.tagline,
+            description: formDesc.trim() || app.description,
+            problem: formProblem.trim() || app.problem,
+            solution: formSolution.trim() || app.solution,
+            category: formCategory,
+            platform: formPlatform,
+            status: formStatus,
+            url: formUrl.trim(),
+            techStack: techArray.length > 0 ? techArray : app.techStack,
+            features: featuresArray.length > 0 ? featuresArray : app.features,
+            lastUpdated: 'Güncellendi'
+          };
         }
-      ],
-      mockupType: 'clean_feed'
-    };
+        return app;
+      });
+      onSaveApps(updated);
+    } else {
+      // Create new app
+      const id = formName.toLowerCase().replace(/[^a-z0-9]/g, '');
+      const created: AppItem = {
+        id: id || `app-${Date.now()}`,
+        name: formName.trim(),
+        tagline: formTagline.trim() || 'Yeni Nesil Bağımsız Uygulama',
+        description: formDesc.trim() || 'ADA Studio çatısı altında geliştirilen bağımsız yazılım aracı.',
+        problem: formProblem.trim() || 'Kullanıcıların karşılaştığı verimsizlik ve gereksiz karmaşa.',
+        solution: formSolution.trim() || 'Sade, hafif ve doğrudan tarayıcıda çalışan çözüm.',
+        category: formCategory,
+        platform: formPlatform,
+        status: formStatus,
+        url: formUrl.trim(),
+        iconName: formPlatform === 'pwa' ? 'Smartphone' : formPlatform === 'chrome_extension' ? 'Cpu' : 'Globe',
+        accentColor: 'from-indigo-500 to-purple-600',
+        previewAccent: 'indigo',
+        badgeText: formPlatform === 'pwa' ? 'PWA • Bağımsız' : 'Tarayıcı Aracı',
+        verifiedBadge: formPlatform === 'pwa' ? 'Doğrulanmış PWA' : 'Bağımsız Araç',
+        features: featuresArray,
+        techStack: techArray,
+        lastUpdated: 'Yeni Eklendi',
+        isFeatured: false,
+        privacyHighlights: ['Kullanıcı Odaklı Gizlilik', 'Yerel Öncelikli Mimari', 'Açık Standartlar'],
+        privacyArchitecture: {
+          localData: 'Cihaz içi yerel depolama',
+          serverSync: 'Yok / Doğrudan istemci',
+          aiExternalApi: 'Yok',
+          accountRequired: 'Gerektirmez'
+        },
+        changelog: [
+          {
+            version: 'v1.0.0',
+            date: 'Yeni Sürüm',
+            notes: ['İlk lansman sürümü']
+          }
+        ],
+        mockupType: 'clean_feed'
+      };
+      onSaveApps([created, ...apps]);
+    }
 
-    onSaveApps([created, ...apps]);
+    resetForm();
     setActiveTab('manage');
-    setNewName('');
-    setNewTagline('');
-    setNewDesc('');
-    setNewProblem('');
-    setNewSolution('');
   };
 
   const handleDeleteApp = (id: string) => {
-    if (confirm('Bu uygulamayı mağaza vitrininizden kaldırmak istediğinize emin misiniz?')) {
+    if (confirm('Bu uygulamayı stüdyo kataloğundan kaldırmak istediğinize emin misiniz?')) {
       onSaveApps(apps.filter((a) => a.id !== id));
     }
   };
@@ -110,14 +222,63 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'adaapps-catalog.json';
+    a.download = `adaapps-catalog-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (evt) => {
+      try {
+        const parsed = JSON.parse(evt.target?.result as string);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0].id && parsed[0].name) {
+          onSaveApps(parsed);
+          setImportStatus('Katalog başarıyla yüklendi!');
+          setTimeout(() => setImportStatus(null), 3000);
+        } else {
+          setImportStatus('Hata: Geçersiz katalog formatı.');
+        }
+      } catch {
+        setImportStatus('Hata: JSON dosyası okunamadı.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const handleExportWaitlistCSV = () => {
+    if (waitlistData.length === 0) return;
+    const header = 'E-posta,Uygulama,Tarih\n';
+    const rows = waitlistData.map((w) => `"${w.email}","${w.appName}","${w.timestamp}"`).join('\n');
+    const blob = new Blob([header + rows], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `adaapps-waitlist-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleClearWaitlist = () => {
+    if (confirm('Bekleme listesindeki tüm kayıtları temizlemek istediğinize emin misiniz?')) {
+      localStorage.removeItem('adaapps_waitlist');
+      setWaitlistData([]);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="creator-studio-title"
         className="relative w-full max-w-3xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -128,11 +289,11 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
               <Sliders className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base sm:text-lg font-bold text-white font-display">
+              <h3 id="creator-studio-title" className="text-base sm:text-lg font-bold text-white font-display">
                 ADA Geliştirici Stüdyo Paneli
               </h3>
               <p className="text-xs text-slate-400">
-                Kişisel mağazanızın uygulama kataloğunu, durumlarını ve bülten kayıtlarını yönetin
+                Ürün kataloğunu yönetin, uygulamaları düzenleyin ve bekleme listesi verilerini dışa aktarın
               </p>
             </div>
           </div>
@@ -140,6 +301,7 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
           <button
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 transition cursor-pointer"
+            aria-label="Kapat"
           >
             <X className="w-5 h-5" />
           </button>
@@ -148,7 +310,7 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
         {/* Sub-nav */}
         <div className="px-6 border-b border-slate-800 bg-slate-950/20 flex items-center gap-2 text-xs">
           <button
-            onClick={() => setActiveTab('manage')}
+            onClick={() => { resetForm(); setActiveTab('manage'); }}
             className={`py-3 px-3 font-semibold border-b-2 transition cursor-pointer ${
               activeTab === 'manage'
                 ? 'border-indigo-500 text-indigo-400'
@@ -159,9 +321,9 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
           </button>
 
           <button
-            onClick={() => setActiveTab('add')}
+            onClick={handleStartCreate}
             className={`py-3 px-3 font-semibold border-b-2 transition cursor-pointer flex items-center gap-1.5 ${
-              activeTab === 'add'
+              activeTab === 'form' && !editingAppId
                 ? 'border-indigo-500 text-indigo-400'
                 : 'border-transparent text-slate-400 hover:text-slate-200'
             }`}
@@ -169,6 +331,13 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
             <Plus className="w-3.5 h-3.5" />
             <span>Yeni Uygulama Ekle</span>
           </button>
+
+          {editingAppId && activeTab === 'form' && (
+            <span className="py-3 px-3 font-semibold border-b-2 border-amber-500 text-amber-400 flex items-center gap-1.5">
+              <Edit3 className="w-3.5 h-3.5" />
+              <span>Uygulamayı Düzenle</span>
+            </span>
+          )}
 
           <button
             onClick={() => setActiveTab('waitlist')}
@@ -179,81 +348,132 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
             }`}
           >
             <Users className="w-3.5 h-3.5" />
-            <span>Bülten & Bekleme Listesi ({waitlistData.length})</span>
+            <span>Bekleme Listesi ({waitlistData.length})</span>
           </button>
         </div>
 
         {/* Tab Content */}
         <div className="p-6 overflow-y-auto space-y-5 text-xs text-slate-300">
+          {importStatus && (
+            <div className={`p-3 rounded-xl text-xs font-medium ${importStatus.includes('Hata') ? 'bg-rose-950/50 text-rose-300 border border-rose-800' : 'bg-emerald-950/50 text-emerald-300 border border-emerald-800'}`}>
+              {importStatus}
+            </div>
+          )}
+
           {activeTab === 'manage' && (
             <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-slate-400">
-                  Vitrindeki uygulamaları doğrudan düzenleyebilir veya yeni projeler ekleyebilirsiniz.
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 border border-slate-800/80 p-3.5 rounded-xl">
+                <span className="text-slate-400 text-xs">
+                  Katalog aktarımı, yedekleme ve sıfırlama araçları:
                 </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleImportJSON}
+                    accept=".json"
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer text-xs"
+                    title="JSON Kataloğu Yükle"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    <span>JSON İçe Aktar</span>
+                  </button>
+
                   <button
                     onClick={handleExportJSON}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-lg transition cursor-pointer text-xs"
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>JSON İndir</span>
                   </button>
+
                   <button
                     onClick={onResetApps}
-                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 rounded-lg transition cursor-pointer"
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/30 text-rose-300 rounded-lg transition cursor-pointer text-xs"
                   >
                     <RotateCcw className="w-3.5 h-3.5" />
-                    <span>Varsayılana Sıfırla</span>
+                    <span>Sıfırla</span>
                   </button>
                 </div>
               </div>
 
               <div className="space-y-2">
-                {apps.map((app) => (
-                  <div
-                    key={app.id}
-                    className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between gap-3"
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${app.accentColor} flex items-center justify-center text-white shrink-0`}>
-                        <span className="font-bold text-xs">{app.name.substring(0, 2).toUpperCase()}</span>
+                {apps.map((app) => {
+                  const meta = getAppStatusMeta(app.status);
+                  return (
+                    <div
+                      key={app.id}
+                      className="bg-slate-950/70 border border-slate-800 rounded-xl p-3.5 flex items-center justify-between gap-3 hover:border-slate-700 transition"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${app.accentColor} flex items-center justify-center text-white shrink-0 shadow`}>
+                          <span className="font-bold text-xs">{app.name.substring(0, 2).toUpperCase()}</span>
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-white truncate text-sm">{app.name}</span>
+                            <span className={`text-[10px] px-2 py-0.5 rounded-full border ${meta.badgeClass}`}>
+                              {meta.label}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 truncate">{app.tagline}</div>
+                        </div>
                       </div>
-                      <div className="min-w-0">
-                        <div className="font-semibold text-white truncate">{app.name}</div>
-                        <div className="text-[11px] text-slate-400 truncate">{app.tagline}</div>
-                      </div>
-                    </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300">
-                        {app.status === 'live' ? 'Yayında' : app.status === 'in_development' ? 'Geliştiriliyor' : 'Konsept'}
-                      </span>
-                      <button
-                        onClick={() => handleDeleteApp(app.id)}
-                        className="p-1.5 text-slate-500 hover:text-rose-400 rounded hover:bg-rose-950/50 transition cursor-pointer"
-                        title="Uygulamayı Kaldır"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <button
+                          onClick={() => handleStartEdit(app)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 bg-slate-800 hover:bg-indigo-600 hover:text-white text-slate-300 rounded-lg transition cursor-pointer text-xs font-medium"
+                          title="Uygulama Bilgilerini Düzenle"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          <span>Düzenle</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteApp(app.id)}
+                          className="p-1.5 text-slate-500 hover:text-rose-400 rounded-lg hover:bg-rose-950/50 transition cursor-pointer"
+                          title="Uygulamayı Kaldır"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
 
-          {activeTab === 'add' && (
-            <form onSubmit={handleCreateApp} className="space-y-4">
+          {activeTab === 'form' && (
+            <form onSubmit={handleFormSubmit} className="space-y-4">
+              <div className="flex items-center justify-between bg-slate-950/50 p-3 rounded-xl border border-slate-800">
+                <span className="font-semibold text-slate-200">
+                  {editingAppId ? `Düzenleniyor: ${formName}` : 'Yeni Uygulama Kaydı'}
+                </span>
+                {editingAppId && (
+                  <button
+                    type="button"
+                    onClick={() => { resetForm(); setActiveTab('manage'); }}
+                    className="text-xs text-slate-400 hover:text-slate-200 underline cursor-pointer"
+                  >
+                    Vazgeç
+                  </button>
+                )}
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Uygulama Adı *</label>
                   <input
                     type="text"
                     required
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    placeholder="ör. finanstakip.app"
+                    value={formName}
+                    onChange={(e) => setFormName(e.target.value)}
+                    placeholder="ör. Evdeki Hesap"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   />
                 </div>
@@ -262,8 +482,8 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                   <label className="block font-semibold text-slate-300 mb-1">Slogan (Tagline)</label>
                   <input
                     type="text"
-                    value={newTagline}
-                    onChange={(e) => setNewTagline(e.target.value)}
+                    value={formTagline}
+                    onChange={(e) => setFormTagline(e.target.value)}
                     placeholder="ör. Sade ve Hızlı Finans Asistanı"
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-indigo-500"
                   />
@@ -274,8 +494,8 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Platform Türü</label>
                   <select
-                    value={newPlatform}
-                    onChange={(e) => setNewPlatform(e.target.value as AppPlatform)}
+                    value={formPlatform}
+                    onChange={(e) => setFormPlatform(e.target.value as AppPlatform)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white"
                   >
                     <option value="pwa">PWA (Web & Mobil)</option>
@@ -288,21 +508,22 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Durum</label>
                   <select
-                    value={newStatus}
-                    onChange={(e) => setNewStatus(e.target.value as AppStatus)}
+                    value={formStatus}
+                    onChange={(e) => setFormStatus(e.target.value as AppStatus)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white"
                   >
                     <option value="live">Yayında (Canlı)</option>
+                    <option value="beta">Açık Beta</option>
                     <option value="in_development">Geliştiriliyor</option>
-                    <option value="concept">Konsept / Fikir</option>
+                    <option value="concept">Konsept / Laboratuvar</option>
                   </select>
                 </div>
 
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Kategori</label>
                   <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value as AppCategory)}
+                    value={formCategory}
+                    onChange={(e) => setFormCategory(e.target.value as AppCategory)}
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white"
                   >
                     <option value="finance">Ev & Bütçe</option>
@@ -320,21 +541,28 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
               </div>
 
               <div>
-                <label className="block font-semibold text-slate-300 mb-1">Uygulama / PWA URL'si</label>
+                <label className="block font-semibold text-slate-300 mb-1">Uygulama / PWA URL'si *</label>
                 <input
-                  type="text"
-                  value={newUrl}
-                  onChange={(e) => setNewUrl(e.target.value)}
+                  type="url"
+                  required
+                  value={formUrl}
+                  onChange={(e) => { setFormUrl(e.target.value); setFormUrlError(null); }}
                   placeholder="https://benimuygulamam.app"
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white font-mono"
                 />
+                {formUrlError && (
+                  <div className="flex items-center gap-1.5 text-rose-400 text-[11px] mt-1">
+                    <AlertCircle className="w-3.5 h-3.5" />
+                    <span>{formUrlError}</span>
+                  </div>
+                )}
               </div>
 
               <div>
                 <label className="block font-semibold text-slate-300 mb-1">Kısa Açıklama</label>
                 <textarea
-                  value={newDesc}
-                  onChange={(e) => setNewDesc(e.target.value)}
+                  value={formDesc}
+                  onChange={(e) => setFormDesc(e.target.value)}
                   rows={2}
                   placeholder="Uygulamanın genel tanıtımı..."
                   className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white"
@@ -345,8 +573,8 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Hangi Problemi Çözüyor?</label>
                   <textarea
-                    value={newProblem}
-                    onChange={(e) => setNewProblem(e.target.value)}
+                    value={formProblem}
+                    onChange={(e) => setFormProblem(e.target.value)}
                     rows={2}
                     placeholder="Mevcut uygulamaların yetersizliği..."
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white"
@@ -356,8 +584,8 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                 <div>
                   <label className="block font-semibold text-slate-300 mb-1">Nasıl Çözüyor?</label>
                   <textarea
-                    value={newSolution}
-                    onChange={(e) => setNewSolution(e.target.value)}
+                    value={formSolution}
+                    onChange={(e) => setFormSolution(e.target.value)}
                     rows={2}
                     placeholder="ADA yaklaşımıyla çözüm..."
                     className="w-full bg-slate-950 border border-slate-700 rounded-xl p-2.5 text-white"
@@ -365,25 +593,84 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                 </div>
               </div>
 
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">Teknoloji Yığını (Virgülle ayırın)</label>
+                  <input
+                    type="text"
+                    value={formTech}
+                    onChange={(e) => setFormTech(e.target.value)}
+                    placeholder="React, PWA, Tailwind"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold text-slate-300 mb-1">Öne Çıkan Özellikler (Virgülle ayırın)</label>
+                  <input
+                    type="text"
+                    value={formFeatures}
+                    onChange={(e) => setFormFeatures(e.target.value)}
+                    placeholder="Offline hazır, Şifreli veri"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+
               <button
                 type="submit"
-                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition cursor-pointer shadow-lg shadow-indigo-600/20"
+                className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition cursor-pointer shadow-lg shadow-indigo-600/20 text-sm flex items-center justify-center gap-2"
               >
-                Uygulamayı ADA Vitrinine Ekle
+                <Check className="w-4 h-4" />
+                <span>{editingAppId ? 'Değişiklikleri Kaydet' : 'Uygulamayı ADA Vitrinine Ekle'}</span>
               </button>
             </form>
           )}
 
           {activeTab === 'waitlist' && (
-            <div className="space-y-3">
-              <div className="flex items-center justify-between text-slate-400">
-                <span>Erken erişim (Waitlist) için kaydolan ziyaretçiler:</span>
-                <span className="font-semibold text-white">{waitlistData.length} Kayıt</span>
+            <div className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white font-semibold">Erken Erişim & Bülten Talepleri</span>
+                    {supabaseActive ? (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                        <Database className="w-3 h-3 text-emerald-400" />
+                        <span>Supabase Bağlı</span>
+                      </span>
+                    ) : (
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1" title="VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlanarak bulut veritabanı aktif edilebilir">
+                        <Cloud className="w-3 h-3 text-amber-400" />
+                        <span>Yerel Depolama (Supabase Hazır)</span>
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-slate-400 text-[11px]">
+                    Toplam {waitlistData.length} kayıtlı ziyaretçi {isLoadingWaitlist ? '(Yükleniyor...)' : ''}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleExportWaitlistCSV}
+                    disabled={waitlistData.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 disabled:opacity-50 text-slate-200 rounded-lg transition cursor-pointer text-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>CSV Dışa Aktar</span>
+                  </button>
+                  <button
+                    onClick={handleClearWaitlist}
+                    disabled={waitlistData.length === 0}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 disabled:opacity-50 border border-rose-500/30 text-rose-300 rounded-lg transition cursor-pointer text-xs"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Listeyi Temizle</span>
+                  </button>
+                </div>
               </div>
 
               {waitlistData.length === 0 ? (
                 <div className="text-center py-8 bg-slate-950/50 rounded-xl border border-slate-800 text-slate-500">
-                  Henüz kaydedilmiş e-posta başvurusu bulunmuyor.
+                  Henüz kaydedilmiş bekleme listesi başvurusu bulunmuyor.
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -396,8 +683,8 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                         <span className="font-semibold text-white">{item.email}</span>
                         <div className="text-[11px] text-indigo-400">{item.appName}</div>
                       </div>
-                      <span className="text-[10px] text-slate-500">
-                        {new Date(item.timestamp).toLocaleDateString('tr-TR')}
+                      <span className="text-[10px] text-slate-500 font-mono">
+                        {new Date(item.timestamp).toLocaleString('tr-TR')}
                       </span>
                     </div>
                   ))}

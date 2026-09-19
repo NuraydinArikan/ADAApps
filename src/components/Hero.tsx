@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowRight, ShieldCheck, Zap, Heart, Smartphone } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Zap, Smartphone, Sparkles } from 'lucide-react';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -11,7 +11,6 @@ interface HeroProps {
 export const Hero: React.FC<HeroProps> = ({
   onExploreClick,
   onStoryClick,
-  totalAppsCount,
   liveAppsCount
 }) => {
   return (
@@ -22,8 +21,8 @@ export const Hero: React.FC<HeroProps> = ({
       <div className="relative max-w-4xl mx-auto text-center px-4">
         {/* Origin Pill */}
         <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/90 border border-slate-700/80 text-xs font-medium text-slate-300 mb-5 shadow-sm">
-          <span className="flex h-2 w-2 rounded-full bg-indigo-400"></span>
-          <span>Şeffaf ve bağımsız yazılımlar geliştiren dijital stüdyo</span>
+          <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span>Bağımsız Ürün Stüdyosu & Doğrudan Dağıtım</span>
           <span className="text-slate-600">•</span>
           <button
             onClick={onStoryClick}
@@ -35,18 +34,19 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Hero Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight font-display leading-[1.15]">
-          Bağımsız Uygulamalar İçin{' '}
+          Kullanıcıya Saygılı,{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
-            Kişisel Bir Dağıtım Vitrini
+            Hafif ve Bağımsız Yazılımlar
           </span>
         </h1>
 
         {/* Hero Description */}
         <p className="mt-4 sm:mt-5 text-sm sm:text-base lg:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-          Apple App Store ve Google Play'in %30 kesintilerine ve haftalar süren onay bürokrasisine takılmadan;{' '}
+          Platform dayatmalarına ve gereksiz aracı bürokrasisine takılmadan;{' '}
           <strong className="text-white font-medium">evdekihesap.app</strong>,{' '}
-          <strong className="text-white font-medium">haberverbana.app</strong> ve{' '}
-          <strong className="text-white font-medium">LessToken</strong> gibi projeleri doğrudan cihazınıza tek tıkla kurun.
+          <strong className="text-white font-medium">haberverbana.app</strong>,{' '}
+          <strong className="text-white font-medium">GuitarFriends</strong> ve{' '}
+          <strong className="text-white font-medium">Less Token</strong> gibi bağımsız ürünleri PWA standartlarıyla doğrudan cihazınıza kurun.
         </p>
 
         {/* Value Highlights */}
@@ -58,12 +58,12 @@ export const Hero: React.FC<HeroProps> = ({
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-            <span>%100 Yerel Veri Gizliliği</span>
+            <span>Şeffaf Veri Mimarisi</span>
           </div>
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900/60 border border-slate-800">
             <Smartphone className="w-3.5 h-3.5 text-indigo-400" />
-            <span>iOS, Android & Masaüstü</span>
+            <span>iOS, Android & Masaüstü Uyumlu</span>
           </div>
         </div>
 
@@ -73,7 +73,7 @@ export const Hero: React.FC<HeroProps> = ({
             onClick={onExploreClick}
             className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-sm rounded-xl shadow-lg shadow-indigo-600/25 transition cursor-pointer flex items-center justify-center gap-2"
           >
-            <span>Uygulamaları Keşfet ({liveAppsCount} Canlı)</span>
+            <span>Kataloğu İncele ({liveAppsCount} Canlı Ürün)</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
@@ -81,7 +81,7 @@ export const Hero: React.FC<HeroProps> = ({
             onClick={onStoryClick}
             className="w-full sm:w-auto px-5 py-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-200 font-semibold text-sm rounded-xl transition cursor-pointer flex items-center justify-center gap-2"
           >
-            <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+            <Sparkles className="w-4 h-4 text-indigo-400" />
             <span>Stüdyo Felsefesi & Manifestosu</span>
           </button>
         </div>

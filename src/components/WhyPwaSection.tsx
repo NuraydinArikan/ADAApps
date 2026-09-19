@@ -1,15 +1,9 @@
 import React, { useState } from 'react';
 import { 
-  ShieldCheck, 
-  Zap, 
   RefreshCw, 
   Coins, 
-  Smartphone, 
   HardDrive, 
-  Check, 
-  ArrowRight,
-  Sparkles,
-  Layers,
+  Sparkles, 
   Lock
 } from 'lucide-react';
 
@@ -29,10 +23,10 @@ export const WhyPwaSection: React.FC = () => {
             <span>Dağıtım Modeli & Bağımsızlık</span>
           </div>
           <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-white font-display">
-            Neden Şahsi Vitrin & Progressive Web App (PWA)?
+            Neden Bağımsız Vitrin & Progressive Web App (PWA)?
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 mt-2 leading-relaxed">
-            Resmi mağazaların haftalarca süren inceleme kuyrukları, %30'a varan komisyon kesintileri ve kısıtlayıcı kuralları yerine; doğrudan kullanıcıya ulaşan modern bir Product Studio.
+            Haftalarca süren inceleme kuyrukları, %30 platform komisyonları ve zorunlu hesap bağımlılığı yerine; doğrudan kullanıcıya ulaşan modern bir Independent Product Studio.
           </p>
         </div>
 
@@ -44,14 +38,14 @@ export const WhyPwaSection: React.FC = () => {
                 <Coins className="w-5 h-5" />
               </div>
               <h3 className="text-sm font-bold text-white mb-1.5 font-display">
-                %0 Komisyon Kesintisi
+                %0 Aracı Komisyonu
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Kullanıcıdan alınan her kuruş veya sunulan ücretsiz hizmet, üçüncü taraf dev şirketlerin %30 haracına maruz kalmaz.
+                Kullanıcıya sunulan uygun fiyatlar veya ücretsiz hizmetler, üçüncü taraf mağazaların yüksek komisyon kesintilerine takılmaz.
               </p>
             </div>
             <div className="mt-3 text-[11px] font-semibold text-emerald-400">
-              ✓ Bağımsız ve Sürdürülebilir
+              ✓ Sürdürülebilir Fiyatlandırma
             </div>
           </div>
 
@@ -64,11 +58,11 @@ export const WhyPwaSection: React.FC = () => {
                 Anında Güncelleme
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Bir hata düzeltmesi veya yeni özellik geliştirdiğinizde mağaza onayı beklemeden, saniyeler içinde tüm kullanıcılara ulaşır.
+                Bir hata düzeltmesi veya yeni özellik geliştirdiğinizde günlerce onay beklemeden, anında tüm kullanıcılara canlı yansır.
               </p>
             </div>
             <div className="mt-3 text-[11px] font-semibold text-indigo-400">
-              ✓ Sıfır Günlük Bekleme
+              ✓ Kesintisiz Geliştirme Döngüsü
             </div>
           </div>
 
@@ -81,11 +75,11 @@ export const WhyPwaSection: React.FC = () => {
                 Hafif & &lt;2 MB Boyut
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                150-200 MB'lık hantal yerel uygulamalar yerine; kullanıcının telefon hafızasını doldurmayan zarif web mimarisi.
+                Yüzlerce megabaytlık şişkin ikili derlemeler yerine; kullanıcının telefon depolamasını doldurmayan modern açık web mimarisi.
               </p>
             </div>
             <div className="mt-3 text-[11px] font-semibold text-amber-400">
-              ✓ Cihazı Yormaz
+              ✓ Cihaz Depolamasına Saygı
             </div>
           </div>
 
@@ -98,11 +92,11 @@ export const WhyPwaSection: React.FC = () => {
                 Güvenli Sandbox
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed">
-                Tarayıcı güvenlik kalkanında çalışır. Telefonunuzun rehberine, fotoğraflarına ya da arka planına izinsiz sızamaz.
+                Tarayıcının katı güvenlik standartlarında çalışır. Telefonunuzun rehberine ya da arka planına izinsiz sızamaz.
               </p>
             </div>
             <div className="mt-3 text-[11px] font-semibold text-cyan-400">
-              ✓ Maksimum Kullanıcı Güveni
+              ✓ Şeffaf Güvenlik Sınırları
             </div>
           </div>
         </div>
@@ -111,7 +105,7 @@ export const WhyPwaSection: React.FC = () => {
         <div className="bg-slate-950/70 border border-slate-800 rounded-2xl p-4 sm:p-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
             <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-slate-300">
-              Karşılaştırma: PWA / ADA Vitrini vs Geleneksel App Store
+              Karşılaştırma: ADAApps PWA Modeli vs Geleneksel Mağazalar
             </h4>
 
             <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
@@ -133,39 +127,39 @@ export const WhyPwaSection: React.FC = () => {
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
               >
-                Resmi App Store'lar
+                Geleneksel Uygulama Mağazaları
               </button>
             </div>
           </div>
 
           {activeComparison === 'pwa' ? (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-500/20">
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-emerald-500/20">
                 <div className="text-emerald-400 font-bold mb-1">Doğrudan Dağıtım</div>
-                <p className="text-slate-300 text-[11px]">Kullanıcı "Ana Ekrana Ekle" diyerek tek tıkla kurar. Apple ID veya Google hesabı şifresi girmeye gerek yoktur.</p>
+                <p className="text-slate-300 text-[11px]">Kullanıcı "Ana Ekrana Ekle" diyerek tek tıkla kurar. Mağaza hesabı veya şifresi girmeye gerek kalmaz.</p>
               </div>
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-500/20">
-                <div className="text-emerald-400 font-bold mb-1">Geliştirici Özgürlüğü</div>
-                <p className="text-slate-300 text-[11px]">Projenizi tekel şirketlerin keyfi kurallarına göre değil, kullanıcılarınızın gerçek ihtiyaçlarına göre geliştirirsiniz.</p>
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-emerald-500/20">
+                <div className="text-emerald-400 font-bold mb-1">Kullanıcı Odaklı Geliştirme</div>
+                <p className="text-slate-300 text-[11px]">Ürünler platformların kural değişikliklerine göre değil, doğrudan kullanıcıların pratik ihtiyaçlarına göre evrilir.</p>
               </div>
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-emerald-500/20">
-                <div className="text-emerald-400 font-bold mb-1">Çapraz Platform</div>
-                <p className="text-slate-300 text-[11px]">Aynı kod tabanı iOS, Android, Mac, Windows ve Linux'ta kusursuz çalışır; çoklu cihaz desteği doğaldır.</p>
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-emerald-500/20">
+                <div className="text-emerald-400 font-bold mb-1">Doğal Çapraz Platform</div>
+                <p className="text-slate-300 text-[11px]">Aynı modern web standartları iOS, Android, Mac, Windows ve Linux'ta kusursuz çalışır.</p>
               </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                <div className="text-slate-300 font-bold mb-1">%30 Kesinti & Yıllık Lisans</div>
-                <p className="text-slate-400 text-[11px]">Apple yıllık 99$ geliştirici ücreti alır, her satıştan %15-%30 arası komisyon keser.</p>
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                <div className="text-slate-300 font-bold mb-1">%15 - %30 Komisyon Kesintisi</div>
+                <p className="text-slate-400 text-[11px]">Geliştirici lisans ücretleri ve yüksek işlem komisyonları nihai ürün fiyatlarını yapay olarak artırır.</p>
               </div>
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                <div className="text-slate-300 font-bold mb-1">Keyfi Reddetmeler</div>
-                <p className="text-slate-400 text-[11px]">Küçük bir metin veya bağlantı yüzünden uygulamanız günler süren inceleme döngüsünde reddedilebilir.</p>
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                <div className="text-slate-300 font-bold mb-1">Geciken Onay Süreçleri</div>
+                <p className="text-slate-400 text-[11px]">Kritik bir hata düzeltmesi veya güvenlik yaması bile günlerce onay kuyruğunda bekleyebilir.</p>
               </div>
-              <div className="bg-slate-900/60 p-3 rounded-xl border border-slate-800">
-                <div className="text-slate-300 font-bold mb-1">Yüksek Boyut & Ağır İndirme</div>
-                <p className="text-slate-400 text-[11px]">Gereksiz kütüphaneler ve ikili derlemeler nedeniyle kullanıcılar mobil veriyle indirmekten kaçınabilir.</p>
+              <div className="bg-slate-900/60 p-3.5 rounded-xl border border-slate-800">
+                <div className="text-slate-300 font-bold mb-1">Yüksek Boyut ve İndirme Bariyeri</div>
+                <p className="text-slate-400 text-[11px]">100MB+ ikili paketler nedeniyle kullanıcılar hücresel veriyle indirmekten çekinir.</p>
               </div>
             </div>
           )}

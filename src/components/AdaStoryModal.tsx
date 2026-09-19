@@ -1,5 +1,5 @@
-import React from 'react';
-import { Heart, Sparkles, X, Shield, Users, Leaf, Terminal, CheckCircle } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { Sparkles, X, Shield, Users, Leaf, Terminal, ArrowRight } from 'lucide-react';
 import { AdaAppsLogo } from './AdaAppsLogo';
 
 interface AdaStoryModalProps {
@@ -8,11 +8,28 @@ interface AdaStoryModalProps {
 }
 
 export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200">
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-slate-950/80 backdrop-blur-md animate-in fade-in duration-200"
+      onClick={onClose}
+    >
       <div 
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="ada-manifesto-title"
         className="relative w-full max-w-2xl bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl overflow-hidden max-h-[90vh] flex flex-col"
         onClick={(e) => e.stopPropagation()}
       >
@@ -24,12 +41,11 @@ export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose })
           <div className="flex items-center gap-3">
             <AdaAppsLogo variant="mark" size="md" />
             <div>
-              <h3 className="text-lg font-bold text-white font-display flex items-center gap-2">
-                ADA Stüdyo Manifestosu & İlkeleri
-                <Heart className="w-4 h-4 text-pink-400 fill-pink-400" />
+              <h3 id="ada-manifesto-title" className="text-lg font-bold text-white font-display flex items-center gap-2">
+                ADA Bağımsız Ürün Stüdyosu Manifestosu
               </h3>
               <p className="text-xs text-slate-400">
-                Geleceğe bırakılan temiz ve şeffaf bir dijital iz
+                Kullanıcıya saygılı, hafif ve şeffaf dijital araçlar üretme felsefesi
               </p>
             </div>
           </div>
@@ -52,10 +68,10 @@ export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose })
               Neden ADAApps?
             </div>
             <p className="text-slate-200 font-medium text-base mb-2">
-              "Bağımsız, temiz, şeffaf ve insan onurunu gözeten dijital ürünler stüdyosu: <span className="text-indigo-400 font-bold">ADA</span>."
+              "Bağımsız, temiz, şeffaf ve insan onurunu gözeten dijital ürünler stüdyosu: <span className="text-indigo-400 font-bold">ADA APPS</span>."
             </p>
             <p className="text-slate-300 text-xs sm:text-sm">
-              Bu stüdyo, sadece bir yazılım vitrini değil; kullanıcı verisini sömürmeyen, tekel mağazaların kısıtlamalarına boyun eğmeyen ve doğrudan kullanıcıya değer katan bağımsız bir dijital atölyedir.
+              Bu stüdyo, rastgele bir katalog değil; kullanıcı verisini reklamcılara satmayan, gereksiz arka plan süreçleriyle cihazınızı yormayan ve modern açık web standartlarıyla (PWA) doğrudan dağıtılan bağımsız bir yazılım atölyesidir.
             </p>
           </div>
 
@@ -69,40 +85,40 @@ export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose })
               <div className="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl">
                 <div className="flex items-center gap-2 text-emerald-400 font-semibold text-xs mb-1">
                   <Shield className="w-4 h-4" />
-                  <span>1. Sıfır Veri Sömürüsü</span>
+                  <span>1. Şeffaf Veri Mimarisi</span>
                 </div>
                 <p className="text-[12px] text-slate-400">
-                  Uygulamalarımızda veri madenciliği, gizli izleyici pikselleri veya kişisel bilgilerinizi reklamcılara satma pratiği kesinlikle bulunmaz.
+                  Uygulamalarımızda veri madenciliği, gizli izleyici pikselleri veya profil çıkarma yoktur. Hangi verinin cihazda kaldığı, hangisinin sunucuya gittiği her ürün sayfasında şeffafça açıklanır.
                 </p>
               </div>
 
               <div className="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl">
                 <div className="flex items-center gap-2 text-indigo-400 font-semibold text-xs mb-1">
                   <Terminal className="w-4 h-4" />
-                  <span>2. PWA ve Doğrudan Dağıtım</span>
+                  <span>2. Modern PWA & Doğrudan Dağıtım</span>
                 </div>
                 <p className="text-[12px] text-slate-400">
-                  Tekel mağazaların %30'luk komisyon ve sansür duvarlarına takılmadan, doğrudan tarayıcınızdan cihazınıza yükleme özgürlüğü.
+                  Platform onay gecikmelerine takılmadan; modern açık web standartlarıyla doğrudan tarayıcınızdan telefon veya bilgisayarınıza tek tıkla yükleme özgürlüğü.
                 </p>
               </div>
 
               <div className="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl">
                 <div className="flex items-center gap-2 text-amber-400 font-semibold text-xs mb-1">
                   <Leaf className="w-4 h-4" />
-                  <span>3. Dikkat Saygısı</span>
+                  <span>3. Dikkat ve Zaman Saygısı</span>
                 </div>
                 <p className="text-[12px] text-slate-400">
-                  Dopamin tuzağı algoritmalar ve sonsuz kaydırma yok. İşinizi halledin, zihninizi toplayın ve gerçek hayatınıza geri dönün.
+                  Dopamin döngüleri, yapay bildirim bombardımanları ve sonsuz kaydırmalar yok. Amacımız işinizi en yalın şekilde çözüp gerçek yaşamınıza dönmenizi sağlamaktır.
                 </p>
               </div>
 
               <div className="bg-slate-950/70 border border-slate-800 p-3.5 rounded-xl">
                 <div className="flex items-center gap-2 text-rose-400 font-semibold text-xs mb-1">
                   <Users className="w-4 h-4" />
-                  <span>4. Zanaatkar Geliştiricilik</span>
+                  <span>4. Zanaatkar Bağımsız Yazılım</span>
                 </div>
                 <p className="text-[12px] text-slate-400">
-                  Milyon dolarlık şirketlerin şişkin yazılımları yerine; tek bir problemi zarif ve hızlı çözen hafif araçlar.
+                  Dev şirketlerin şişkin ve hantal monolitleri yerine; her biri tek bir problemi zarif, hızlı ve verimli çözen odaklanmış araçlar.
                 </p>
               </div>
             </div>
@@ -110,13 +126,14 @@ export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose })
 
           <div className="border-t border-slate-800 pt-4 flex items-center justify-between">
             <div className="text-xs text-slate-400">
-              Geliştirici: <span className="text-slate-200 font-semibold">ADA Studio</span>
+              Yayıncı: <span className="text-slate-200 font-semibold">ADA Independent Product Studio</span>
             </div>
             <button
               onClick={onClose}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
             >
-              Anladım, Vitrini Keşfet
+              <span>Vitrini Keşfet</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
