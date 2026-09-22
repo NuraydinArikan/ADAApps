@@ -1,7 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AppItem, AppCategory, AppPlatform, AppStatus } from '../types';
 import { getAppStatusMeta } from '../utils/statusMeta';
-import { getWaitlistSubmissions, isSupabaseConfigured } from '../lib/waitlistService';
+import { 
+  getWaitlistSubmissions, 
+  isSupabaseConfigured,
+  getSupabaseConfig,
+  setSupabaseConfig,
+  testSupabaseConnection 
+} from '../lib/waitlistService';
 import { 
   X, 
   Plus, 
@@ -16,7 +22,12 @@ import {
   FileText, 
   AlertCircle,
   Database,
-  Cloud
+  Cloud,
+  CheckCircle2,
+  RefreshCw,
+  Settings,
+  ChevronDown,
+  ChevronUp
 } from 'lucide-react';
 
 interface CreatorStudioModalProps {
@@ -68,17 +79,68 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
   // Waitlist data state
   const [waitlistData, setWaitlistData] = useState<any[]>([]);
   const [isLoadingWaitlist, setIsLoadingWaitlist] = useState(false);
-  const supabaseActive = isSupabaseConfigured();
+  const [supabaseConfig, setSupabaseConfigState] = useState(() => getSupabaseConfig());
+  const [customSbUrl, setCustomSbUrl] = useState('');
+  const [customSbKey, setCustomSbKey] = useState('');
+  const [testResult, setTestResult] = useState<{ ok: boolean; message: string; tableExists?: boolean } | null>(null);
+  const [isTestingSb, setIsTestingSb] = useState(false);
+  const [showSbSettings, setShowSbSettings] = useState(false);
+
+  useEffect(() => {
+    const cfg = getSupabaseConfig();
+    setSupabaseConfigState(cfg);
+    setCustomSbUrl(cfg.url);
+    setCustomSbKey(cfg.key);
+    setShowSbSettings(!cfg.isConfigured);
+  }, [isOpen]);
+
+  const refreshWaitlist = () => {
+    setIsLoadingWaitlist(true);
+    getWaitlistSubmissions()
+      .then((data) => setWaitlistData(data))
+      .catch(() => setWaitlistData([]))
+      .finally(() => setIsLoadingWaitlist(false));
+  };
 
   useEffect(() => {
     if (isOpen && activeTab === 'waitlist') {
-      setIsLoadingWaitlist(true);
-      getWaitlistSubmissions()
-        .then((data) => setWaitlistData(data))
-        .catch(() => setWaitlistData([]))
-        .finally(() => setIsLoadingWaitlist(false));
+      refreshWaitlist();
     }
   }, [isOpen, activeTab]);
+
+  const handleTestSupabase = async () => {
+    setIsTestingSb(true);
+    setTestResult(null);
+    try {
+      const res = await testSupabaseConnection();
+      setTestResult(res);
+      if (res.ok) {
+        refreshWaitlist();
+      }
+    } catch (err: any) {
+      setTestResult({ ok: false, message: `Hata: ${err.message}` });
+    } finally {
+      setIsTestingSb(false);
+    }
+  };
+
+  const handleSaveSupabaseConfig = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSupabaseConfig(customSbUrl.trim(), customSbKey.trim());
+    const updated = getSupabaseConfig();
+    setSupabaseConfigState(updated);
+    await handleTestSupabase();
+  };
+
+  const handleClearSupabaseConfig = () => {
+    setSupabaseConfig('', '');
+    const updated = getSupabaseConfig();
+    setSupabaseConfigState(updated);
+    setCustomSbUrl('');
+    setCustomSbKey('');
+    setTestResult(null);
+    refreshWaitlist();
+  };
 
   if (!isOpen) return null;
 
@@ -628,19 +690,20 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
 
           {activeTab === 'waitlist' && (
             <div className="space-y-4">
+              {/* Supabase Status Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-950/60 p-3.5 rounded-xl border border-slate-800">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <span className="text-white font-semibold">Erken Erişim & Bülten Talepleri</span>
-                    {supabaseActive ? (
+                    {supabaseConfig.isConfigured ? (
                       <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
                         <Database className="w-3 h-3 text-emerald-400" />
-                        <span>Supabase Bağlı</span>
+                        <span>Supabase {supabaseConfig.source === 'env' ? '(.env)' : '(Tarayıcı)'}</span>
                       </span>
                     ) : (
-                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1" title="VITE_SUPABASE_URL ve VITE_SUPABASE_ANON_KEY tanımlanarak bulut veritabanı aktif edilebilir">
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1">
                         <Cloud className="w-3 h-3 text-amber-400" />
-                        <span>Yerel Depolama (Supabase Hazır)</span>
+                        <span>Yerel Depolama (Supabase Bekleniyor)</span>
                       </span>
                     )}
                   </div>
@@ -648,7 +711,17 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                     Toplam {waitlistData.length} kayıtlı ziyaretçi {isLoadingWaitlist ? '(Yükleniyor...)' : ''}
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    onClick={() => setShowSbSettings(!showSbSettings)}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 rounded-lg transition cursor-pointer text-xs"
+                  >
+                    <Settings className="w-3.5 h-3.5 text-indigo-400" />
+                    <span>Supabase Ayarları & Test</span>
+                    {showSbSettings ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                  </button>
+
                   <button
                     onClick={handleExportWaitlistCSV}
                     disabled={waitlistData.length === 0}
@@ -667,6 +740,119 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                   </button>
                 </div>
               </div>
+
+              {/* Supabase Interactive Config & Test Panel */}
+              {showSbSettings && (
+                <div className="bg-slate-900/90 border border-indigo-500/30 rounded-xl p-4 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs font-bold text-white">
+                      <Database className="w-4 h-4 text-emerald-400" />
+                      <span>Supabase Veritabanı Yapılandırması</span>
+                    </div>
+                    {supabaseConfig.isConfigured && (
+                      <button
+                        onClick={handleTestSupabase}
+                        disabled={isTestingSb}
+                        className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600/20 hover:bg-emerald-600/30 border border-emerald-500/40 text-emerald-300 text-xs font-semibold rounded-lg transition cursor-pointer disabled:opacity-50"
+                      >
+                        <RefreshCw className={`w-3 h-3 ${isTestingSb ? 'animate-spin' : ''}`} />
+                        <span>{isTestingSb ? 'Test Ediliyor...' : 'Bağlantıyı Şimdi Test Et'}</span>
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-[11px] text-slate-400">
+                    Bekleme listesi başvurularını Supabase'de saklamak için aşağıdaki iki değeri tanımlayabilirsiniz. Değerler kök dizindeki <code className="text-indigo-300 bg-slate-950 px-1 py-0.5 rounded">.env</code> dosyasından otomatik okunur veya doğrudan bu alana yapıştırılabilir.
+                  </p>
+
+                  <form onSubmit={handleSaveSupabaseConfig} className="space-y-2.5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Project URL (VITE_SUPABASE_URL)
+                        </label>
+                        <input
+                          type="url"
+                          value={customSbUrl}
+                          onChange={(e) => setCustomSbUrl(e.target.value)}
+                          placeholder="https://xyzcompany.supabase.co"
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono placeholder-slate-600"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Anon Public Key (VITE_SUPABASE_ANON_KEY)
+                        </label>
+                        <input
+                          type="password"
+                          value={customSbKey}
+                          onChange={(e) => setCustomSbKey(e.target.value)}
+                          placeholder="eyJhbGciOi..."
+                          className="w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-white font-mono placeholder-slate-600"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="submit"
+                          disabled={isTestingSb || !customSbUrl.trim() || !customSbKey.trim()}
+                          className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white rounded-lg text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
+                        >
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Ayarları Kaydet & Doğrula</span>
+                        </button>
+                        {supabaseConfig.source === 'local' && (
+                          <button
+                            type="button"
+                            onClick={handleClearSupabaseConfig}
+                            className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs transition cursor-pointer"
+                          >
+                            Temizle
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="text-[10px] text-slate-400">
+                        Tablo gereksinimi: <code className="text-emerald-400 font-mono">waitlist</code> (email, app_id, app_name, created_at, status)
+                      </div>
+                    </div>
+                  </form>
+
+                  {/* Test Result Message */}
+                  {testResult && (
+                    <div
+                      className={`p-2.5 rounded-lg text-xs flex items-start gap-2 border ${
+                        testResult.ok
+                          ? 'bg-emerald-950/60 border-emerald-500/40 text-emerald-200'
+                          : 'bg-rose-950/60 border-rose-500/40 text-rose-200'
+                      }`}
+                    >
+                      {testResult.ok ? (
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      ) : (
+                        <AlertCircle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                      )}
+                      <div className="space-y-1">
+                        <div>{testResult.message}</div>
+                        {!testResult.ok && testResult.tableExists === false && (
+                          <div className="text-[11px] text-slate-300 font-mono bg-slate-950/80 p-2 rounded border border-slate-800 select-all">
+                            CREATE TABLE waitlist (
+                              id uuid primary key default gen_random_uuid(),
+                              email text not null,
+                              app_id text not null,
+                              app_name text not null,
+                              created_at timestamptz default now(),
+                              status text default 'queued'
+                            );
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {waitlistData.length === 0 ? (
                 <div className="text-center py-8 bg-slate-950/50 rounded-xl border border-slate-800 text-slate-500">

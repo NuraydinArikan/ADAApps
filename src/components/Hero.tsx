@@ -1,5 +1,6 @@
 import React from 'react';
 import { ArrowRight, ShieldCheck, Zap, Smartphone, Sparkles } from 'lucide-react';
+import { LiveAppsTicker } from './LiveAppsTicker';
 
 interface HeroProps {
   onExploreClick: () => void;
@@ -34,19 +35,15 @@ export const Hero: React.FC<HeroProps> = ({
 
         {/* Hero Title */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-white tracking-tight font-display leading-[1.15]">
-          Kullanıcıya Saygılı,{' '}
+          Kullanıcının hayatını kolaylaştıracak,{' '}
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-purple-300 to-pink-400">
-            Hafif ve Bağımsız Yazılımlar
+            güvenli, yer kaplamayan ve bağımsız uygulamalar
           </span>
         </h1>
 
         {/* Hero Description */}
         <p className="mt-4 sm:mt-5 text-sm sm:text-base lg:text-lg text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
-          Platform dayatmalarına ve gereksiz aracı bürokrasisine takılmadan;{' '}
-          <strong className="text-white font-medium">evdekihesap.app</strong>,{' '}
-          <strong className="text-white font-medium">haberverbana.app</strong>,{' '}
-          <strong className="text-white font-medium">GuitarFriends</strong> ve{' '}
-          <strong className="text-white font-medium">Less Token</strong> gibi bağımsız ürünleri PWA standartlarıyla doğrudan cihazınıza kurun.
+          Alıştığınız uygulama platformlarından bağımsız ürünleri PWA standartlarıyla doğrudan cihazınıza kurun.
         </p>
 
         {/* Value Highlights */}
@@ -66,6 +63,9 @@ export const Hero: React.FC<HeroProps> = ({
             <span>iOS, Android & Masaüstü Uyumlu</span>
           </div>
         </div>
+
+        {/* Live Apps Running Ribbon (Right to Left Ticker with Centered Yellow Highlight) */}
+        <LiveAppsTicker />
 
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
