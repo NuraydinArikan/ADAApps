@@ -22,8 +22,7 @@
     "motion": "^12.23.24",
     "qrcode": "^1.5.4",
     "react": "^19.0.1",
-    "react-dom": "^19.0.1",
-    "vite": "^6.2.3"
+    "react-dom": "^19.0.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
@@ -33,5 +32,8 @@
     "tsx": "^4.21.0",
     "typescript": "~5.8.2",
     "vite": "^6.2.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

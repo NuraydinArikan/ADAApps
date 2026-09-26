@@ -3,7 +3,7 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 // Environment variable extraction with Vite client prefix
 const metaEnv = (import.meta as { env?: Record<string, string> }).env || {};
 const envUrl = metaEnv.VITE_SUPABASE_URL?.trim();
-const envKey = metaEnv.VITE_SUPABASE_ANON_KEY?.trim();
+const envKey = (metaEnv.VITE_SUPABASE_PUBLISHABLE_KEY || metaEnv.VITE_SUPABASE_ANON_KEY)?.trim();
 
 export interface SupabaseCredentials {
   url: string;
