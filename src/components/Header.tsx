@@ -7,9 +7,13 @@ import {
   Download, 
   Smartphone, 
   Compass, 
-  ExternalLink 
+  ExternalLink,
+  Sun,
+  Moon,
+  Contrast
 } from 'lucide-react';
 import { AdaAppsLogo } from './AdaAppsLogo';
+import { ThemeMode } from '../types';
 
 interface HeaderProps {
   onOpenStory: () => void;
@@ -18,6 +22,8 @@ interface HeaderProps {
   onSearchChange: (query: string) => void;
   onInstallPwa?: () => void;
   canInstallPwa?: boolean;
+  theme: ThemeMode;
+  onThemeChange: (theme: ThemeMode) => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -26,10 +32,12 @@ export const Header: React.FC<HeaderProps> = ({
   searchQuery,
   onSearchChange,
   onInstallPwa,
-  canInstallPwa
+  canInstallPwa,
+  theme,
+  onThemeChange
 }) => {
   return (
-    <header className="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80">
+    <header className="sticky top-0 z-40 bg-slate-950/85 backdrop-blur-md border-b border-slate-800/80 transition-colors">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
         {/* Brand Logo & Origin Tag */}
         <AdaAppsLogo
@@ -55,11 +63,60 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         {/* Navigation & Action Buttons */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          {/* Theme Toggle (Dark / Light / Reverse) */}
+          <div 
+            className="flex items-center bg-slate-900/90 border border-slate-800 rounded-xl p-1 shadow-xs" 
+            role="group" 
+            aria-label="Tema Seçimi"
+          >
+            <button
+              onClick={() => onThemeChange('dark')}
+              className={`p-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 ${
+                theme === 'dark'
+                  ? 'bg-indigo-600 text-white shadow-xs font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Koyu Tema (Slate-950)"
+              aria-label="Koyu Tema"
+            >
+              <Moon className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline text-[11px]">Koyu</span>
+            </button>
+
+            <button
+              onClick={() => onThemeChange('light')}
+              className={`p-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 ${
+                theme === 'light'
+                  ? 'bg-amber-400 text-slate-950 shadow-xs font-bold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Açık Tema (Slate-50)"
+              aria-label="Açık Tema"
+            >
+              <Sun className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline text-[11px]">Açık</span>
+            </button>
+
+            <button
+              onClick={() => onThemeChange('reverse')}
+              className={`p-1.5 rounded-lg text-xs transition cursor-pointer flex items-center gap-1 ${
+                theme === 'reverse'
+                  ? 'bg-purple-600 text-white shadow-xs font-semibold'
+                  : 'text-slate-400 hover:text-slate-200'
+              }`}
+              title="Ters Kontrast (Reverse)"
+              aria-label="Ters Kontrast"
+            >
+              <Contrast className="w-3.5 h-3.5" />
+              <span className="hidden xl:inline text-[11px]">Ters</span>
+            </button>
+          </div>
+
           {/* Heart Story Button */}
           <button
             onClick={onOpenStory}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white rounded-xl text-xs font-semibold transition cursor-pointer"
             title="Stüdyo Manifestosu & Felsefesi"
           >
             <Heart className="w-3.5 h-3.5 text-pink-400 fill-pink-400" />
@@ -70,21 +127,21 @@ export const Header: React.FC<HeaderProps> = ({
           {canInstallPwa && (
             <button
               onClick={onInstallPwa}
-              className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-emerald-600/20 cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-semibold transition shadow-md shadow-emerald-600/20 cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Vitrini Yükle</span>
+              <span className="hidden sm:inline">Vitrini Yükle</span>
             </button>
           )}
 
           {/* Creator Studio Mode */}
           <button
             onClick={onOpenCreatorStudio}
-            className="flex items-center gap-1.5 px-3 py-1.5 sm:py-2 bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold transition cursor-pointer"
+            className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-indigo-950/60 hover:bg-indigo-900/80 border border-indigo-500/30 text-indigo-300 rounded-xl text-xs font-semibold transition cursor-pointer"
             title="Geliştirici Yönetim Paneli"
           >
             <Sliders className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">Stüdyo Paneli</span>
+            <span className="hidden md:inline">Stüdyo Paneli</span>
           </button>
         </div>
       </div>

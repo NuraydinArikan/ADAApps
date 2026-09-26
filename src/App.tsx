@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AppItem, AppPlatform, AppCategory } from './types';
+import { AppItem, AppPlatform, AppCategory, ThemeMode } from './types';
 import { INITIAL_APPS } from './data/appsData';
 import { Header } from './components/Header';
 import { Hero } from './components/Hero';
@@ -11,6 +11,7 @@ import { WaitlistModal } from './components/WaitlistModal';
 import { AdaStoryModal } from './components/AdaStoryModal';
 import { CreatorStudioModal } from './components/CreatorStudioModal';
 import { LiveDemoDrawer } from './components/LiveDemoDrawer';
+import { WhatsNewBanner } from './components/WhatsNewBanner';
 import { WhyPwaSection } from './components/WhyPwaSection';
 import { Footer } from './components/Footer';
 import { 
@@ -65,6 +66,32 @@ export default function App() {
       // ignore
     }
   };
+
+  // Theme state with local persistence: 'dark' (slate-950), 'light' (slate-50), or 'reverse'
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    try {
+      const savedTheme = localStorage.getItem('adaapps_theme') as ThemeMode;
+      if (savedTheme === 'light' || savedTheme === 'reverse' || savedTheme === 'dark') {
+        return savedTheme;
+      }
+    } catch {
+      // ignore
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('adaapps_theme', theme);
+    } catch {
+      // ignore
+    }
+    if (typeof document !== 'undefined') {
+      const root = document.documentElement;
+      root.classList.remove('theme-dark', 'theme-light', 'theme-reverse');
+      root.classList.add(`theme-${theme}`);
+    }
+  }, [theme]);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -227,7 +254,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 antialiased">
+    <div className={`min-h-screen flex flex-col antialiased transition-colors duration-300 ${
+      theme === 'light'
+        ? 'bg-slate-50 text-slate-900 theme-light'
+        : theme === 'reverse'
+        ? 'bg-black text-white theme-reverse'
+        : 'bg-slate-950 text-slate-100 theme-dark'
+    }`}>
       {/* Top Navigation */}
       <Header
         onOpenStory={() => setIsStoryOpen(true)}
@@ -236,6 +269,8 @@ export default function App() {
         onSearchChange={setSearchQuery}
         onInstallPwa={handleInstallPwa}
         canInstallPwa={canInstallPwa}
+        theme={theme}
+        onThemeChange={setTheme}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -289,6 +324,19 @@ export default function App() {
             <div className="text-slate-400 text-[11px] mt-0.5">Veri & Gizlilik Mimarisi</div>
           </div>
         </div>
+
+        {/* What's New Notification Bar */}
+        <WhatsNewBanner
+          apps={apps}
+          onOpenAppDetails={(app) => {
+            if (handleNavigateToApp) {
+              handleNavigateToApp(app);
+            } else {
+              setSelectedApp(app);
+            }
+          }}
+          onOpenLiveDemo={(app) => setDemoApp(app)}
+        />
 
         {/* Catalog Header & Filters */}
         <div id="explore-catalog" className="scroll-mt-24 mb-8">

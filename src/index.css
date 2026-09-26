@@ -28,3 +28,122 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(71, 85, 105, 1);
 }
+
+/* LIGHT MODE (Slate-50 Accessibility Theme) */
+html.theme-light,
+body.theme-light,
+.theme-light {
+  background-color: #f8fafc !important;
+  color: #0f172a !important;
+}
+
+.theme-light header {
+  background-color: rgba(255, 255, 255, 0.92) !important;
+  border-color: #e2e8f0 !important;
+}
+
+.theme-light [class*="bg-slate-950"] {
+  background-color: #f8fafc !important;
+}
+
+.theme-light [class*="bg-slate-900"] {
+  background-color: #ffffff !important;
+}
+
+.theme-light [class*="bg-slate-900/60"],
+.theme-light [class*="bg-slate-900/80"],
+.theme-light [class*="bg-slate-900/90"],
+.theme-light [class*="bg-slate-900/95"] {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.theme-light [class*="border-slate-800"],
+.theme-light [class*="border-slate-800/80"] {
+  border-color: #e2e8f0 !important;
+}
+
+.theme-light [class*="border-slate-700"] {
+  border-color: #cbd5e1 !important;
+}
+
+.theme-light [class*="text-white"],
+.theme-light [class*="text-slate-100"] {
+  color: #0f172a !important;
+}
+
+.theme-light [class*="text-slate-200"],
+.theme-light [class*="text-slate-300"] {
+  color: #334155 !important;
+}
+
+.theme-light [class*="text-slate-400"] {
+  color: #64748b !important;
+}
+
+.theme-light input,
+.theme-light textarea,
+.theme-light select {
+  background-color: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+.theme-light input::placeholder {
+  color: #94a3b8 !important;
+}
+
+.theme-light [class*="hover:bg-slate-900"]:hover {
+  background-color: #f8fafc !important;
+}
+
+.theme-light [class*="hover:bg-slate-800"]:hover {
+  background-color: #e2e8f0 !important;
+}
+
+.theme-light [class*="hover:border-slate-700"]:hover {
+  border-color: #94a3b8 !important;
+}
+
+.theme-light ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.theme-light ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+}
+.theme-light ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* REVERSE (High Contrast Stark Palette) */
+html.theme-reverse,
+body.theme-reverse,
+.theme-reverse {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+.theme-reverse header {
+  background-color: rgba(5, 5, 5, 0.95) !important;
+  border-color: #eab308 !important;
+}
+
+.theme-reverse [class*="bg-slate-950"],
+.theme-reverse [class*="bg-slate-900"] {
+  background-color: #09090b !important;
+}
+
+.theme-reverse [class*="border-slate-800"],
+.theme-reverse [class*="border-slate-700"] {
+  border-color: #3f3f46 !important;
+}
+
+.theme-reverse [class*="text-white"],
+.theme-reverse [class*="text-slate-100"] {
+  color: #ffffff !important;
+}
+
+.theme-reverse [class*="text-slate-300"],
+.theme-reverse [class*="text-slate-400"] {
+  color: #e4e4e7 !important;
+}
+
