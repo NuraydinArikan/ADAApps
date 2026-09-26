@@ -41,7 +41,7 @@ export const AppCard: React.FC<AppCardProps> = ({
   };
 
   return (
-    <div className="group relative bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/90 rounded-2xl p-5 sm:p-6 transition-all duration-300 flex flex-col justify-between shadow-lg hover:shadow-2xl hover:shadow-indigo-950/20">
+    <div className="group relative bg-slate-900/80 hover:bg-slate-900 border border-slate-800 hover:border-slate-700/90 rounded-2xl p-5 sm:p-6 transition-all duration-300 hover:scale-105 flex flex-col justify-between shadow-lg hover:shadow-2xl hover:shadow-indigo-950/20">
       {/* Top Section */}
       <div>
         <div className="flex items-start justify-between gap-3 mb-3.5">
