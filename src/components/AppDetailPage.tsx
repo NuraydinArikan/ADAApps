@@ -18,7 +18,9 @@ import {
   Calendar,
   CheckCircle2,
   Lock,
-  ArrowUpRight
+  ArrowUpRight,
+  Globe,
+  Heart
 } from 'lucide-react';
 
 interface AppDetailPageProps {
@@ -27,6 +29,8 @@ interface AppDetailPageProps {
   onOpenQr: (app: AppItem) => void;
   onOpenWaitlist: (app: AppItem) => void;
   onOpenLiveDemo: (app: AppItem) => void;
+  isFavorite?: boolean;
+  onToggleFavorite?: (appId: string) => void;
 }
 
 export const AppDetailPage: React.FC<AppDetailPageProps> = ({
@@ -34,7 +38,9 @@ export const AppDetailPage: React.FC<AppDetailPageProps> = ({
   onBack,
   onOpenQr,
   onOpenWaitlist,
-  onOpenLiveDemo
+  onOpenLiveDemo,
+  isFavorite = false,
+  onToggleFavorite
 }) => {
   const [copied, setCopied] = useState(false);
   const statusMeta = getAppStatusMeta(app.status);
@@ -50,13 +56,16 @@ export const AppDetailPage: React.FC<AppDetailPageProps> = ({
   };
 
   const getPlatformLabel = (platform: string) => {
+    if (app.platformDisplay) {
+      return app.platformDisplay;
+    }
     switch (platform) {
       case 'pwa':
-        return 'PWA (Doğrudan Web & Mobil Kurulum)';
+        return 'PWA • Web Uygulaması';
       case 'desktop':
-        return 'Masaüstü (PyQt6 / Native)';
+        return 'Masaüstü (Windows 11)';
       case 'chrome_extension':
-        return 'Tarayıcı Eklentisi (Chrome / Brave)';
+        return 'Chrome Eklentisi • Web Uygulaması';
       default:
         return 'Web Uygulaması';
     }
@@ -74,22 +83,39 @@ export const AppDetailPage: React.FC<AppDetailPageProps> = ({
           <span>Tüm Uygulamalara Dön</span>
         </button>
 
-        <button
-          onClick={handleShare}
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition text-sm font-medium cursor-pointer"
-        >
-          {copied ? (
-            <>
-              <Check className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-300">Bağlantı Kopyalandı!</span>
-            </>
-          ) : (
-            <>
-              <Share2 className="w-4 h-4 text-indigo-400" />
-              <span>Sayfayı Paylaş</span>
-            </>
+        <div className="flex items-center gap-2">
+          {onToggleFavorite && (
+            <button
+              onClick={() => onToggleFavorite(app.id)}
+              className={`inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border transition text-sm font-medium cursor-pointer ${
+                isFavorite
+                  ? 'bg-rose-950/60 border-rose-500/50 text-rose-300'
+                  : 'bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border-slate-800'
+              }`}
+              title={isFavorite ? 'Favorilerden Çıkar' : 'Favorilere Ekle'}
+            >
+              <Heart className={`w-4 h-4 ${isFavorite ? 'fill-rose-500 text-rose-500' : 'text-slate-400'}`} />
+              <span>{isFavorite ? 'Favorilerimde' : 'Favorilere Ekle'}</span>
+            </button>
           )}
-        </button>
+
+          <button
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-800 transition text-sm font-medium cursor-pointer"
+          >
+            {copied ? (
+              <>
+                <Check className="w-4 h-4 text-emerald-400" />
+                <span className="text-emerald-300">Bağlantı Kopyalandı!</span>
+              </>
+            ) : (
+              <>
+                <Share2 className="w-4 h-4 text-indigo-400" />
+                <span>Sayfayı Paylaş</span>
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Hero Header */}
@@ -114,6 +140,22 @@ export const AppDetailPage: React.FC<AppDetailPageProps> = ({
                   </span>
                 )}
               </div>
+
+              {app.customDomain && (
+                <div className="py-0.5">
+                  <a
+                    href={app.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-sm font-mono font-medium text-emerald-400 hover:text-emerald-300 transition"
+                  >
+                    <Globe className="w-4 h-4 text-emerald-400/80" />
+                    <span>{app.customDomain}</span>
+                    <ExternalLink className="w-3 h-3 opacity-70" />
+                  </a>
+                </div>
+              )}
+
               <p className="text-slate-300 text-base font-medium">
                 {app.tagline}
               </p>

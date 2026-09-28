@@ -1,0 +1,33 @@
+name: AdaApps Sentinel 7/24 Sentetik İzleme
+
+on:
+  schedule:
+    # Her saat başı çalışır (Günde 24 kez, ayda ~720 kez, GitHub ücretsiz kotası dahilindedir)
+    - cron: '0 * * * *'
+  workflow_dispatch: # GitHub arayüzünden tek tıkla elle tetikleme imkanı
+
+jobs:
+  health-check:
+    name: Otonom QA ve Sağlık Denetimi
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Kodu Klonla
+        uses: actions/checkout@v4
+
+      - name: Node.js Ortamını Kur
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Bağımlılıkları Kur
+        run: npm ci || npm install
+
+      - name: Sentinel Denetimini Başlat
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: node scripts/sentinel-monitor.js

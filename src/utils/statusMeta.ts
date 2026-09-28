@@ -16,47 +16,27 @@ export function getAppStatusMeta(status: AppStatus): StatusMeta {
     case 'live':
       return {
         key: 'live',
-        label: 'Yayında',
+        label: 'Canlı',
         stageLabel: 'Canlı Sürüm',
-        badgeClass: 'bg-emerald-950/60 border-emerald-500/30 text-emerald-300',
-        dotClass: 'bg-emerald-400',
+        badgeClass: 'bg-emerald-950/70 border-emerald-500/40 text-emerald-300',
+        dotClass: 'bg-emerald-400 ring-2 ring-emerald-400/20',
         cardActionText: 'Yükle & Aç',
         isAvailableNow: true,
         colorHex: '#10b981'
       };
-    case 'beta':
-      return {
-        key: 'beta',
-        label: 'Açık Beta',
-        stageLabel: 'Beta Sürümü',
-        badgeClass: 'bg-cyan-950/60 border-cyan-500/30 text-cyan-300',
-        dotClass: 'bg-cyan-400',
-        cardActionText: 'Beta Sürümü Aç',
-        isAvailableNow: true,
-        colorHex: '#06b6d4'
-      };
     case 'in_development':
+    case 'beta':
+    case 'concept':
+    default:
       return {
         key: 'in_development',
         label: 'Geliştiriliyor',
         stageLabel: 'Geliştirme Aşamasında',
-        badgeClass: 'bg-amber-950/60 border-amber-500/30 text-amber-300',
-        dotClass: 'bg-amber-400',
-        cardActionText: 'Erken Erişim',
+        badgeClass: 'bg-amber-950/70 border-amber-500/40 text-amber-300',
+        dotClass: 'bg-amber-400 ring-2 ring-amber-400/20',
+        cardActionText: 'Geliştiriliyor',
         isAvailableNow: false,
         colorHex: '#f59e0b'
-      };
-    case 'concept':
-    default:
-      return {
-        key: 'concept',
-        label: 'Laboratuvar',
-        stageLabel: 'Ar-Ge / Prototip',
-        badgeClass: 'bg-violet-950/60 border-violet-500/30 text-violet-300',
-        dotClass: 'bg-violet-400',
-        cardActionText: 'Erken Erişim',
-        isAvailableNow: false,
-        colorHex: '#a855f7'
       };
   }
 }

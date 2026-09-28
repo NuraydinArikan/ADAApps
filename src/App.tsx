@@ -13,7 +13,9 @@ import { CreatorStudioModal } from './components/CreatorStudioModal';
 import { LiveDemoDrawer } from './components/LiveDemoDrawer';
 import { WhatsNewBanner } from './components/WhatsNewBanner';
 import { WhyPwaSection } from './components/WhyPwaSection';
+import { AboutSection } from './components/AboutSection';
 import { Footer } from './components/Footer';
+import { SentinelStatusModal } from './components/SentinelStatusModal';
 import { 
   Sparkles, 
   Search, 
@@ -98,6 +100,53 @@ export default function App() {
   const [selectedPlatform, setSelectedPlatform] = useState<string>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
+  // Favorites state with LocalStorage persistence
+  const [favoriteIds, setFavoriteIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('adaapps_favorites');
+      if (saved) {
+        return JSON.parse(saved);
+      }
+    } catch {
+      // ignore
+    }
+    return [];
+  });
+
+  const toggleFavorite = (appId: string) => {
+    setFavoriteIds((prev) => {
+      const next = prev.includes(appId) ? prev.filter((id) => id !== appId) : [...prev, appId];
+      try {
+        localStorage.setItem('adaapps_favorites', JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  };
+
+  // Minimal view state: when active, hides Hero, Stats, and What's New, bringing application cards directly to the top
+  const [isMinimalView, setIsMinimalView] = useState(() => {
+    try {
+      return localStorage.getItem('adaapps_minimal_view') === 'true';
+    } catch {
+      return false;
+    }
+  });
+
+  const handleToggleMinimalView = (val?: boolean) => {
+    setIsMinimalView((prev) => {
+      const next = typeof val === 'boolean' ? val : !prev;
+      try {
+        localStorage.setItem('adaapps_minimal_view', String(next));
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   // Modals state
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [qrApp, setQrApp] = useState<AppItem | null>(null);
@@ -105,6 +154,7 @@ export default function App() {
   const [demoApp, setDemoApp] = useState<AppItem | null>(null);
   const [isStoryOpen, setIsStoryOpen] = useState(false);
   const [isCreatorOpen, setIsCreatorOpen] = useState(false);
+  const [isSentinelOpen, setIsSentinelOpen] = useState(false);
 
   // URL routing state for Individual Product Pages
   const parseAppSlugFromUrl = (): string | null => {
@@ -222,9 +272,11 @@ export default function App() {
         app.solution.toLowerCase().includes(query) ||
         app.techStack.some((t) => t.toLowerCase().includes(query));
 
-      // Platform match
+      // Platform & Favorites match
       let matchesPlatform = true;
-      if (selectedPlatform === 'pwa') {
+      if (selectedPlatform === 'favorites') {
+        matchesPlatform = favoriteIds.includes(app.id);
+      } else if (selectedPlatform === 'pwa') {
         matchesPlatform = app.platform === 'pwa';
       } else if (selectedPlatform === 'desktop') {
         matchesPlatform = app.platform === 'desktop';
@@ -244,12 +296,33 @@ export default function App() {
 
       return matchesSearch && matchesPlatform && matchesCategory;
     });
-  }, [apps, searchQuery, selectedPlatform, selectedCategory]);
+  }, [apps, searchQuery, selectedPlatform, selectedCategory, favoriteIds]);
 
   const liveAppsCount = useMemo(() => apps.filter((a) => a.status === 'live').length, [apps]);
 
   const scrollToExplore = () => {
     const el = document.getElementById('explore-catalog');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  const handleScrollToAbout = () => {
+    if (activeRouteApp) {
+      handleBackToCatalog();
+      setTimeout(() => {
+        const el = document.getElementById('hakkinda');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+      return;
+    }
+    if (isMinimalView) {
+      handleToggleMinimalView(false);
+      setTimeout(() => {
+        const el = document.getElementById('hakkinda');
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
+      }, 150);
+      return;
+    }
+    const el = document.getElementById('hakkinda');
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
@@ -259,18 +332,26 @@ export default function App() {
         ? 'bg-slate-50 text-slate-900 theme-light'
         : theme === 'reverse'
         ? 'bg-black text-white theme-reverse'
-        : 'bg-slate-950 text-slate-100 theme-dark'
+        : 'text-slate-100 theme-dark'
     }`}>
       {/* Top Navigation */}
       <Header
         onOpenStory={() => setIsStoryOpen(true)}
         onOpenCreatorStudio={() => setIsCreatorOpen(true)}
+        onOpenAbout={handleScrollToAbout}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onInstallPwa={handleInstallPwa}
         canInstallPwa={canInstallPwa}
         theme={theme}
         onThemeChange={setTheme}
+        favoritesCount={favoriteIds.length}
+        isFavoritesActive={selectedPlatform === 'favorites'}
+        onOpenFavorites={() => {
+          setSelectedPlatform('favorites');
+          scrollToExplore();
+        }}
+        onOpenSentinel={() => setIsSentinelOpen(true)}
       />
 
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
@@ -286,68 +367,142 @@ export default function App() {
           </div>
         ) : (
           <>
+            {isMinimalView ? (
+              <div className="pt-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800/80 mb-6">
+                <div className="flex items-center gap-2.5">
+                  <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <h2 className="text-base sm:text-lg font-bold text-white font-display">
+                    Uygulama Vitrini ({apps.length} Uygulama)
+                  </h2>
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <button
+                    onClick={() => setSelectedPlatform('all')}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border ${
+                      selectedPlatform === 'all'
+                        ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                        : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800'
+                    }`}
+                  >
+                    Tümü ({apps.length})
+                  </button>
+
+                  <button
+                    onClick={() => setSelectedPlatform(selectedPlatform === 'favorites' ? 'all' : 'favorites')}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer border ${
+                      selectedPlatform === 'favorites'
+                        ? 'bg-rose-600 text-white border-rose-500 shadow-xs'
+                        : 'bg-slate-900 text-slate-300 hover:text-rose-300 border-slate-800'
+                    }`}
+                    title="Favori Uygulamalarım"
+                  >
+                    <Heart className={`w-3.5 h-3.5 ${selectedPlatform === 'favorites' ? 'fill-white text-white' : 'text-rose-400 fill-rose-500/20'}`} />
+                    <span>Favorilerim ({favoriteIds.length})</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleToggleMinimalView(false)}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold shadow-sm transition cursor-pointer shrink-0 ml-1"
+                    title="Tanıtım ve Detay Görünümüne Dön"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                    <span>Tam Görünüm</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+          <>
             {/* Hero Section */}
             <Hero
               onExploreClick={scrollToExplore}
               onStoryClick={() => setIsStoryOpen(true)}
+              onAboutClick={handleScrollToAbout}
               totalAppsCount={apps.length}
               liveAppsCount={liveAppsCount}
+              onToggleMinimalView={() => handleToggleMinimalView(true)}
+              onOpenSentinel={() => setIsSentinelOpen(true)}
             />
 
-        {/* Studio Quick Stats Bar */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 px-5 bg-slate-900/60 border border-slate-800/80 rounded-2xl mb-12 text-center text-xs">
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-white font-display">
-              {apps.length} Ürün
+            {/* Studio Quick Stats Bar */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 py-4 px-5 bg-slate-900/60 border border-slate-800/80 rounded-2xl mb-12 text-center text-xs">
+              <div>
+                <div className="text-xl sm:text-2xl font-extrabold text-white font-display">
+                  {apps.length} Ürün
+                </div>
+                <div className="text-slate-400 text-[11px] mt-0.5">Stüdyo Portföyü</div>
+              </div>
+
+              <div 
+                onClick={() => setIsSentinelOpen(true)}
+                className="cursor-pointer hover:bg-slate-800/50 p-1 rounded-xl transition group"
+                title="7/24 Sentinel Canlı Durum Paneli"
+              >
+                <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display flex items-center justify-center gap-1.5">
+                  <span>{liveAppsCount} Canlı Yayında</span>
+                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                </div>
+                <div className="text-slate-400 text-[11px] mt-0.5 group-hover:text-emerald-300 transition">
+                  7/24 Sentinel Nöbette →
+                </div>
+              </div>
+
+              <div>
+                <div className="text-xl sm:text-2xl font-extrabold text-indigo-400 font-display">
+                  PWA
+                </div>
+                <div className="text-slate-400 text-[11px] mt-0.5">Doğrudan Web Dağıtımı</div>
+              </div>
+
+              <div>
+                <div className="text-xl sm:text-2xl font-extrabold text-pink-400 font-display">
+                  Şeffaf
+                </div>
+                <div className="text-slate-400 text-[11px] mt-0.5">Veri & Gizlilik Mimarisi</div>
+              </div>
             </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Stüdyo Portföyü</div>
-          </div>
 
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-emerald-400 font-display">
-              {liveAppsCount} Canlı / Beta
-            </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Aktif Kullanıma Açık</div>
-          </div>
+            {/* What's New Notification Bar */}
+            <WhatsNewBanner
+              apps={apps}
+              onOpenAppDetails={(app) => {
+                if (handleNavigateToApp) {
+                  handleNavigateToApp(app);
+                } else {
+                  setSelectedApp(app);
+                }
+              }}
+              onOpenLiveDemo={(app) => setDemoApp(app)}
+            />
+          </>
+        )}
 
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-indigo-400 font-display">
-              PWA
-            </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Doğrudan Web Dağıtımı</div>
-          </div>
-
-          <div>
-            <div className="text-xl sm:text-2xl font-extrabold text-pink-400 font-display">
-              Şeffaf
-            </div>
-            <div className="text-slate-400 text-[11px] mt-0.5">Veri & Gizlilik Mimarisi</div>
-          </div>
-        </div>
-
-        {/* What's New Notification Bar */}
-        <WhatsNewBanner
-          apps={apps}
-          onOpenAppDetails={(app) => {
-            if (handleNavigateToApp) {
-              handleNavigateToApp(app);
-            } else {
-              setSelectedApp(app);
-            }
-          }}
-          onOpenLiveDemo={(app) => setDemoApp(app)}
-        />
-
-        {/* Catalog Header & Filters */}
-        <div id="explore-catalog" className="scroll-mt-24 mb-8">
+        {/* Catalog Header & Filters (Hidden in Minimal View) */}
+        {!isMinimalView && (
+          <div id="explore-catalog" className="scroll-mt-24 mb-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-white font-display flex items-center gap-2">
-                <span>ADA APPS Vitrini</span>
-                <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
-                  {filteredApps.length} Uygulama
-                </span>
-              </h2>
+              <div className="flex items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-white font-display flex items-center gap-2">
+                  <span>ADA APPS Vitrini</span>
+                  <span className="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300">
+                    {filteredApps.length} Uygulama
+                  </span>
+                </h2>
+
+                <button
+                  onClick={() => handleToggleMinimalView()}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-xl text-xs font-semibold transition cursor-pointer border ${
+                    isMinimalView
+                      ? 'bg-indigo-600 text-white border-indigo-500 shadow-xs'
+                      : 'bg-slate-900 text-slate-300 hover:text-white border-slate-800 hover:border-slate-700'
+                  }`}
+                  title={isMinimalView ? "Tanıtım ve detay görünümüne geç" : "Sadece uygulama kutucuklarını göster (Sade Mod)"}
+                >
+                  <Sparkles className="w-3 h-3 text-indigo-400" />
+                  <span>{isMinimalView ? 'Tam Görünüme Dön' : 'Sade Vitrin Modu'}</span>
+                </button>
+              </div>
               <p className="text-xs sm:text-sm text-slate-400 mt-1">
                 İhtiyacınıza uygun uygulamayı seçin, anında kullanmaya başlayın veya ana ekranınıza kurun.
               </p>
@@ -379,6 +534,20 @@ export default function App() {
                 }`}
               >
                 Tümü ({apps.length})
+              </button>
+
+              {/* Favorilerim Filtre Sekmesi */}
+              <button
+                onClick={() => setSelectedPlatform('favorites')}
+                className={`px-3 py-1.5 rounded-xl font-semibold transition cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  selectedPlatform === 'favorites'
+                    ? 'bg-rose-600 text-white shadow-sm'
+                    : 'bg-slate-900 text-slate-400 hover:text-rose-300 hover:bg-slate-850 border border-slate-800'
+                }`}
+                title="Favorilere Eklediğiniz Uygulamalar"
+              >
+                <Heart className={`w-3.5 h-3.5 ${selectedPlatform === 'favorites' ? 'fill-white text-white' : 'text-rose-400 fill-rose-500/30'}`} />
+                <span>Favorilerim ({favoriteIds.length})</span>
               </button>
 
               <button
@@ -485,44 +654,75 @@ export default function App() {
             </div>
           </div>
         </div>
+        )}
 
-            {/* Application Cards Grid */}
-            {filteredApps.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
-                {filteredApps.map((app) => (
-                  <AppCard
-                    key={app.id}
-                    app={app}
-                    onOpenDetails={(a) => setSelectedApp(a)}
-                    onOpenQR={(a) => setQrApp(a)}
-                    onOpenWaitlist={(a) => setWaitlistApp(a)}
-                    onLaunchInteractiveDemo={(a) => setDemoApp(a)}
-                    onNavigateToPage={(a) => handleNavigateToApp(a)}
-                  />
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-16 bg-slate-900/50 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto">
-                <Search className="w-8 h-8 text-slate-500 mx-auto mb-3" />
-                <h3 className="text-base font-bold text-white mb-1">Aramanızla Eşleşen Uygulama Bulunamadı</h3>
-                <p className="text-xs text-slate-400 mb-4">
-                  Farklı bir arama terimi deneyebilir veya filtreleri sıfırlayabilirsiniz.
-                </p>
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    setSelectedPlatform('all');
-                    setSelectedCategory('all');
-                  }}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
-                >
-                  Tüm Uygulamaları Göster
-                </button>
-              </div>
-            )}
+        {/* Application Cards Grid */}
+        {filteredApps.length > 0 ? (
+          <div className={
+            isMinimalView
+              ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+              : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6"
+          }>
+            {filteredApps.map((app) => (
+              <AppCard
+                key={app.id}
+                app={app}
+                isMinimal={isMinimalView}
+                isFavorite={favoriteIds.includes(app.id)}
+                onToggleFavorite={toggleFavorite}
+                onOpenDetails={(a) => setSelectedApp(a)}
+                onOpenQR={(a) => setQrApp(a)}
+                onOpenWaitlist={(a) => setWaitlistApp(a)}
+                onLaunchInteractiveDemo={(a) => setDemoApp(a)}
+                onNavigateToPage={(a) => handleNavigateToApp(a)}
+              />
+            ))}
+          </div>
+        ) : selectedPlatform === 'favorites' ? (
+          <div className="text-center py-16 bg-slate-900/50 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto animate-in fade-in duration-300">
+            <div className="w-14 h-14 mx-auto mb-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-400">
+              <Heart className="w-7 h-7 fill-rose-500/20 text-rose-400" />
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white mb-1.5 font-display">Henüz Favori Uygulamanız Yok</h3>
+            <p className="text-xs sm:text-sm text-slate-400 mb-5 leading-relaxed">
+              Uygulama kartlarının üzerindeki kalp (♥) ikonuna tıklayarak beğendiğiniz uygulamaları favorilerinize ekleyebilir ve buradan tek tıkla hızlıca erişebilirsiniz.
+            </p>
+            <button
+              onClick={() => {
+                setSelectedPlatform('all');
+                setSelectedCategory('all');
+                setSearchQuery('');
+              }}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer shadow-md shadow-indigo-600/20"
+            >
+              Tüm Uygulamaları Keşfet
+            </button>
+          </div>
+        ) : (
+          <div className="text-center py-16 bg-slate-900/50 border border-slate-800 rounded-2xl p-8 max-w-md mx-auto">
+            <Search className="w-8 h-8 text-slate-500 mx-auto mb-3" />
+            <h3 className="text-base font-bold text-white mb-1">Aramanızla Eşleşen Uygulama Bulunamadı</h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Farklı bir arama terimi deneyebilir veya filtreleri sıfırlayabilirsiniz.
+            </p>
+            <button
+              onClick={() => {
+                setSearchQuery('');
+                setSelectedPlatform('all');
+                setSelectedCategory('all');
+              }}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-semibold transition cursor-pointer"
+            >
+              Tüm Uygulamaları Göster
+            </button>
+          </div>
+        )}
 
-            {/* Why PWA / Distribution Manifesto Section */}
-            <WhyPwaSection />
+            {/* Why PWA / Distribution Manifesto Section (Hidden in Minimal View) */}
+            {!isMinimalView && <WhyPwaSection />}
+
+            {/* ADAApps Hakkında & İletişim Bölümü (Hidden in Minimal View) */}
+            {!isMinimalView && <AboutSection />}
           </>
         )}
       </main>
@@ -531,6 +731,8 @@ export default function App() {
       <Footer
         onOpenStory={() => setIsStoryOpen(true)}
         onOpenCreatorStudio={() => setIsCreatorOpen(true)}
+        onOpenSentinel={() => setIsSentinelOpen(true)}
+        onOpenAbout={handleScrollToAbout}
       />
 
       {/* Modals & Drawers */}
@@ -575,6 +777,12 @@ export default function App() {
         apps={apps}
         onSaveApps={handleSaveApps}
         onResetApps={handleResetApps}
+      />
+
+      <SentinelStatusModal
+        isOpen={isSentinelOpen}
+        onClose={() => setIsSentinelOpen(false)}
+        apps={apps}
       />
 
       <LiveDemoDrawer

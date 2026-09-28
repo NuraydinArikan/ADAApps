@@ -29,17 +29,79 @@
   background: rgba(71, 85, 105, 1);
 }
 
+/* ========================================================
+   MAIN DARK THEME (Koyu Tema - Modern Kozmik Gradyen & Geometrik Nokta Deseni)
+   ======================================================== */
+html.theme-dark,
+body.theme-dark,
+.theme-dark {
+  background-color: #030712 !important;
+  color: #f1f5f9 !important;
+  background-image: 
+    /* Üstten dökülen zarif çivit mavisi / mor ambient ışıltı */
+    radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99, 102, 241, 0.28), transparent 70%),
+    /* Sağ tarafta yumuşak mor/magenta aurası */
+    radial-gradient(ellipse 65% 45% at 95% 35%, rgba(168, 85, 247, 0.16), transparent 60%),
+    /* Sol altta neon turkuaz aurası */
+    radial-gradient(ellipse 60% 50% at 5% 75%, rgba(14, 165, 233, 0.15), transparent 60%),
+    /* Derin gradyen geçiş katmanı */
+    linear-gradient(180deg, rgba(15, 23, 42, 0.5) 0%, rgba(3, 7, 18, 0.95) 100%),
+    /* Fütüristik mikro-nokta takım yıldızı ızgarası (Constellation dot grid) */
+    radial-gradient(rgba(148, 163, 184, 0.13) 1.2px, transparent 1.2px) !important;
+  background-size: 100% 100%, 100% 100%, 100% 100%, 100% 100%, 28px 28px !important;
+  background-attachment: fixed !important;
+  background-position: center, center, center, center, 0 0 !important;
+}
+
+.theme-dark header {
+  background-color: rgba(3, 7, 18, 0.82) !important;
+  backdrop-filter: blur(16px) !important;
+  border-bottom: 1px solid rgba(99, 102, 241, 0.25) !important;
+}
+
+.theme-dark footer {
+  background-color: rgba(3, 7, 18, 0.9) !important;
+  border-top-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+/* Cam efektli, hafif iç ışıltılı kartlar */
+.theme-dark .group[class*="bg-slate-900"] {
+  background: linear-gradient(145deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.65) 100%) !important;
+  backdrop-filter: blur(12px) !important;
+  border-color: rgba(99, 102, 241, 0.22) !important;
+}
+
+.theme-dark .group[class*="bg-slate-900"]:hover {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.92) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
+  border-color: rgba(129, 140, 248, 0.55) !important;
+  box-shadow: 0 20px 35px -10px rgba(99, 102, 241, 0.25), 0 0 15px -3px rgba(168, 85, 247, 0.15) !important;
+}
+
+/* Hızlı İstatistik Paneli Koyu Temada Şık Yarı Saydam Gradyen */
+.theme-dark [class*="bg-slate-900/60"] {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(3, 7, 18, 0.85) 100%) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+  backdrop-filter: blur(12px) !important;
+}
+
 /* LIGHT MODE (Slate-50 Accessibility Theme) */
 html.theme-light,
 body.theme-light,
 .theme-light {
   background-color: #f8fafc !important;
+  background-image: none !important;
   color: #0f172a !important;
 }
 
 .theme-light header {
-  background-color: rgba(255, 255, 255, 0.92) !important;
+  background-color: rgba(255, 255, 255, 0.95) !important;
   border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05) !important;
+}
+
+.theme-light footer {
+  background-color: #f1f5f9 !important;
+  border-top-color: #e2e8f0 !important;
 }
 
 .theme-light [class*="bg-slate-950"] {
@@ -54,7 +116,37 @@ body.theme-light,
 .theme-light [class*="bg-slate-900/80"],
 .theme-light [class*="bg-slate-900/90"],
 .theme-light [class*="bg-slate-900/95"] {
-  background-color: rgba(255, 255, 255, 0.95) !important;
+  background-color: #ffffff !important;
+}
+
+/* Clear dark gradients in light theme so they don't obscure text */
+.theme-light [class*="from-slate-900"],
+.theme-light [class*="from-slate-950"],
+.theme-light [class*="from-indigo-950"],
+.theme-light [class*="from-purple-950"] {
+  background-image: none !important;
+  background-color: #ffffff !important;
+}
+
+/* Light tint backgrounds */
+.theme-light [class*="bg-indigo-950"] {
+  background-color: #eef2ff !important;
+}
+
+.theme-light [class*="bg-purple-950"] {
+  background-color: #faf5ff !important;
+}
+
+.theme-light [class*="bg-emerald-950"] {
+  background-color: #ecfdf5 !important;
+}
+
+.theme-light [class*="bg-amber-950"] {
+  background-color: #fffbeb !important;
+}
+
+.theme-light [class*="bg-cyan-950"] {
+  background-color: #ecfeff !important;
 }
 
 .theme-light [class*="border-slate-800"],
@@ -77,18 +169,40 @@ body.theme-light,
 }
 
 .theme-light [class*="text-slate-400"] {
-  color: #64748b !important;
+  color: #475569 !important;
+}
+
+/* Keep white text on vibrant action buttons and badges in light theme */
+.theme-light button[class*="bg-indigo-600"],
+.theme-light a[class*="bg-indigo-600"],
+.theme-light button[class*="from-indigo-600"],
+.theme-light a[class*="from-indigo-600"],
+.theme-light button[class*="bg-rose-600"],
+.theme-light button[class*="bg-emerald-600"],
+.theme-light button[class*="bg-indigo-600"] *,
+.theme-light a[class*="bg-indigo-600"] *,
+.theme-light button[class*="from-indigo-600"] *,
+.theme-light a[class*="from-indigo-600"] *,
+.theme-light button[class*="bg-rose-600"] *,
+.theme-light button[class*="bg-emerald-600"] * {
+  color: #ffffff !important;
+}
+
+.theme-light button[class*="from-indigo-600"],
+.theme-light a[class*="from-indigo-600"] {
+  background-image: linear-gradient(to right, #4f46e5, #9333ea) !important;
 }
 
 .theme-light input,
 .theme-light textarea,
 .theme-light select {
-  background-color: #f1f5f9 !important;
+  background-color: #ffffff !important;
   border-color: #cbd5e1 !important;
   color: #0f172a !important;
 }
 
-.theme-light input::placeholder {
+.theme-light input::placeholder,
+.theme-light textarea::placeholder {
   color: #94a3b8 !important;
 }
 
@@ -114,22 +228,42 @@ body.theme-light,
   background: #94a3b8;
 }
 
-/* REVERSE (High Contrast Stark Palette) */
+/* ========================================================
+   REVERSE THEME (Ters Kontrast - Saf Zifiri Siyah, Sıfır Desen, Yüksek Kontrastlı Kenarlıklar)
+   ======================================================== */
 html.theme-reverse,
 body.theme-reverse,
 .theme-reverse {
   background-color: #000000 !important;
+  background-image: none !important;
   color: #ffffff !important;
 }
 
 .theme-reverse header {
-  background-color: rgba(5, 5, 5, 0.95) !important;
-  border-color: #eab308 !important;
+  background-color: #050505 !important;
+  border-bottom: 2px solid #eab308 !important; /* Yüksek kontrast kehribar sınır */
+}
+
+.theme-reverse footer {
+  background-color: #050505 !important;
+  border-top: 1px solid #3f3f46 !important;
 }
 
 .theme-reverse [class*="bg-slate-950"],
 .theme-reverse [class*="bg-slate-900"] {
   background-color: #09090b !important;
+}
+
+.theme-reverse .group[class*="bg-slate-900"] {
+  background: #09090b !important;
+  border-color: #3f3f46 !important;
+  box-shadow: none !important;
+}
+
+.theme-reverse .group[class*="bg-slate-900"]:hover {
+  background: #141418 !important;
+  border-color: #facc15 !important; /* Yüksek kontrast sarı vurgulu çerçeve */
+  box-shadow: 0 0 0 1px #facc15 !important;
 }
 
 .theme-reverse [class*="border-slate-800"],
@@ -144,6 +278,96 @@ body.theme-reverse,
 
 .theme-reverse [class*="text-slate-300"],
 .theme-reverse [class*="text-slate-400"] {
-  color: #e4e4e7 !important;
+  color: #f4f4f5 !important;
 }
+
+/* ========================================================
+   ABOUT & MANIFESTO SECTIONS - THEME CONSTRAINTS & ACCESSIBILITY
+   ======================================================== */
+
+/* Dark Theme */
+.theme-dark .about-section-container,
+.theme-dark .why-pwa-container {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(3, 7, 18, 0.95) 100%) !important;
+  border-color: rgba(99, 102, 241, 0.25) !important;
+}
+
+.theme-dark .about-spotlight-card {
+  background: linear-gradient(145deg, rgba(30, 27, 75, 0.45) 0%, rgba(15, 23, 42, 0.85) 100%) !important;
+  border-color: rgba(99, 102, 241, 0.35) !important;
+}
+
+.theme-dark .about-quote-box {
+  background: rgba(49, 46, 129, 0.35) !important;
+  border-left-color: #818cf8 !important;
+  color: #ffffff !important;
+}
+
+.theme-dark .about-card {
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-color: #1e293b !important;
+}
+
+/* Light Theme - Razor Sharp Contrast */
+.theme-light .about-section-container,
+.theme-light .why-pwa-container {
+  background: #ffffff !important;
+  background-image: none !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.08) !important;
+}
+
+.theme-light .about-spotlight-card {
+  background: #f8fafc !important;
+  background-image: none !important;
+  border-color: #cbd5e1 !important;
+  box-shadow: 0 4px 15px -3px rgba(99, 102, 241, 0.08) !important;
+}
+
+.theme-light .about-quote-box {
+  background: #eef2ff !important;
+  border-left-color: #4f46e5 !important;
+  color: #1e1b4b !important; /* High contrast deep indigo-950 */
+  font-weight: 600 !important;
+}
+
+.theme-light .about-card {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+}
+
+.theme-light .about-card h3,
+.theme-light .about-card h4 {
+  color: #0f172a !important;
+}
+
+.theme-light .about-card p {
+  color: #475569 !important;
+}
+
+/* Reverse Theme - High Contrast Pure Dark */
+.theme-reverse .about-section-container,
+.theme-reverse .why-pwa-container {
+  background: #09090b !important;
+  border-color: #3f3f46 !important;
+}
+
+.theme-reverse .about-spotlight-card {
+  background: #000000 !important;
+  border-color: #eab308 !important;
+}
+
+.theme-reverse .about-quote-box {
+  background: #18181b !important;
+  border-left-color: #facc15 !important;
+  color: #ffffff !important;
+}
+
+.theme-reverse .about-card {
+  background: #09090b !important;
+  border-color: #3f3f46 !important;
+  color: #ffffff !important;
+}
+
 

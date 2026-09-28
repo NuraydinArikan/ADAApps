@@ -38,6 +38,8 @@ export interface AppItem {
   platform: AppPlatform;
   status: AppStatus;
   url: string;
+  customDomain?: string; // e.g. "evdekihesap.app"
+  platformDisplay?: string; // e.g. "PWA • Web Uygulaması"
   officialStoreUrl?: string;
   iconName: string;
   accentColor: string;

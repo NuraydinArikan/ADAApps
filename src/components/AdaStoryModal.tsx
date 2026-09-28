@@ -65,14 +65,21 @@ export const AdaStoryModal: React.FC<AdaStoryModalProps> = ({ isOpen, onClose })
           <div className="bg-gradient-to-br from-indigo-950/40 via-purple-950/20 to-slate-900 border border-indigo-500/20 rounded-xl p-4 sm:p-5">
             <div className="text-xs font-semibold uppercase tracking-wider text-indigo-400 mb-1 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5" />
-              Neden ADAApps?
+              ADAApps Hakkında & Neden Kuruldu?
             </div>
             <p className="text-slate-200 font-medium text-base mb-2">
               "Bağımsız, temiz, şeffaf ve insan onurunu gözeten dijital ürünler stüdyosu: <span className="text-indigo-400 font-bold">ADA APPS</span>."
             </p>
+            <blockquote className="my-3 p-3 bg-indigo-950/40 border-l-4 border-indigo-500 rounded-r-lg text-xs sm:text-sm text-indigo-200 italic leading-relaxed">
+              “ADAApps bir İletişim Fakültesi okuyan üniversite öğrencisinin kendisini hem yapay zeka hem de uygulama tasarlama alanlarında geliştirme çabasının henüz yolun başında olan bir ürünüdür. Şimdilik kendisinin ve çevresinin ihtiyaçlarına yönelik uygulama tasarımları yapmaktadır.”
+            </blockquote>
             <p className="text-slate-300 text-xs sm:text-sm">
               Bu stüdyo, rastgele bir katalog değil; kullanıcı verisini reklamcılara satmayan, gereksiz arka plan süreçleriyle cihazınızı yormayan ve modern açık web standartlarıyla (PWA) doğrudan dağıtılan bağımsız bir yazılım atölyesidir.
             </p>
+            <div className="mt-3 pt-3 border-t border-indigo-500/20 text-xs text-slate-400 flex items-center gap-1.5">
+              <span>İletişim & Geri Bildirim:</span>
+              <a href="mailto:destek@adaapps.dev" className="text-indigo-300 hover:text-white font-mono font-semibold underline underline-offset-2">destek@adaapps.dev</a>
+            </div>
           </div>
 
           {/* Pillars */}

@@ -21,7 +21,8 @@ import {
   Server,
   Database,
   UserCheck,
-  Share2
+  Share2,
+  Globe
 } from 'lucide-react';
 
 interface AppModalProps {
@@ -107,7 +108,26 @@ export const AppModal: React.FC<AppModalProps> = ({
                     {app.verifiedBadge}
                   </span>
                 )}
+                <span className="text-xs px-2 py-0.5 rounded-md font-medium bg-slate-800 text-slate-300 border border-slate-700/60">
+                  {app.platformDisplay || (app.platform === 'chrome_extension' ? 'Chrome Eklentisi • Web' : app.platform === 'pwa' ? 'PWA • Web Uygulaması' : 'Web Uygulaması')}
+                </span>
               </div>
+
+              {app.customDomain && (
+                <div className="py-0.5">
+                  <a
+                    href={app.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-mono font-medium text-emerald-400 hover:text-emerald-300 transition"
+                  >
+                    <Globe className="w-3.5 h-3.5 text-emerald-400/80" />
+                    <span>{app.customDomain}</span>
+                    <ExternalLink className="w-3 h-3 opacity-70" />
+                  </a>
+                </div>
+              )}
+
               <p className="text-xs sm:text-sm text-indigo-400 font-medium mt-0.5">
                 {app.tagline}
               </p>

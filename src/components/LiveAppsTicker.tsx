@@ -10,7 +10,7 @@ interface TickerApp {
 const LIVE_APPS: TickerApp[] = [
   { id: 'evdekihesap', name: 'EvdekiHesap', url: 'https://evdekihesap.app' },
   { id: 'haberverbana', name: 'HaberVerBana', url: 'https://haberverbana.app' },
-  { id: 'guitarfirends', name: 'GuitarFriends', url: 'https://guitarfriends.app' },
+  { id: 'guitarfriends', name: 'GuitarFriends', url: 'https://guitarfriends.app' },
   { id: 'lesstoken', name: 'LessToken', url: 'https://lesstoken.app' }
 ];
 
