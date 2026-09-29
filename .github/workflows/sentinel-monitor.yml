@@ -23,7 +23,7 @@ jobs:
 
       - name: Sentinel Denetimini Başlat
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GEMINI_API_KEY: ${{ secrets.AQ.Ab8RN6IC5kY0KlEtTQ5dh3D0w_NpKSFV8DunGGYh0DwfUddMIg }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.8660378466:AAFpcF54ocSfjT36NSzGUBfM-lcE8nIeJB0 }}
+          TELEGRAM_CHAT_ID: ${{ secrets.946496294 }}
         run: node scripts/sentinel-monitor.js
