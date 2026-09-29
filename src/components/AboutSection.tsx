@@ -20,6 +20,7 @@ import {
   HeartHandshake
 } from 'lucide-react';
 import { AdaAppsLogo } from './AdaAppsLogo';
+import { saveContactMessage } from '../lib/contactService';
 
 export const AboutSection: React.FC = () => {
   // Copy email state
@@ -43,7 +44,14 @@ export const AboutSection: React.FC = () => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    // Simulate submission and construct mailto link as fallback option
+    // Save message to local studio inbox
+    saveContactMessage({
+      senderName: senderName.trim(),
+      senderEmail: senderEmail.trim(),
+      subjectType: formSubject,
+      message: message.trim()
+    });
+
     setIsSubmitted(true);
   };
 

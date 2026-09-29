@@ -19,11 +19,7 @@ jobs:
       - name: Node.js Ortamını Kur
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Bağımlılıkları Kur
-        run: npm ci || npm install
+          node-version: 22
 
       - name: Sentinel Denetimini Başlat
         env:

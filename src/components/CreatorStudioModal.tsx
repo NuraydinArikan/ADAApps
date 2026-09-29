@@ -9,6 +9,12 @@ import {
   testSupabaseConnection 
 } from '../lib/waitlistService';
 import { 
+  getContactMessages, 
+  markMessageAsRead, 
+  deleteContactMessage, 
+  ContactMessage 
+} from '../lib/contactService';
+import { 
   X, 
   Plus, 
   Trash2, 
@@ -27,7 +33,13 @@ import {
   RefreshCw,
   Settings,
   ChevronDown,
-  ChevronUp
+  ChevronUp,
+  Mail,
+  Inbox,
+  Send,
+  ExternalLink,
+  HelpCircle,
+  Copy
 } from 'lucide-react';
 
 interface CreatorStudioModalProps {
@@ -45,10 +57,27 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
   onSaveApps,
   onResetApps
 }) => {
-  const [activeTab, setActiveTab] = useState<'manage' | 'form' | 'waitlist'>('manage');
+  const [activeTab, setActiveTab] = useState<'manage' | 'form' | 'waitlist' | 'messages'>('manage');
   const [editingAppId, setEditingAppId] = useState<string | null>(null);
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Contact Messages & Email setup states
+  const [contactMessages, setContactMessages] = useState<ContactMessage[]>(() => getContactMessages());
+  const [showEmailGuide, setShowEmailGuide] = useState(false);
+  const [copiedDns, setCopiedDns] = useState<string | null>(null);
+
+  const refreshContactMessages = () => {
+    setContactMessages(getContactMessages());
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+    refreshContactMessages();
+    const handleNewMsg = () => refreshContactMessages();
+    window.addEventListener('adaapps_new_message', handleNewMsg);
+    return () => window.removeEventListener('adaapps_new_message', handleNewMsg);
+  }, [isOpen]);
 
   // Form states (used for both Create and Edit)
   const [formName, setFormName] = useState('');
@@ -411,6 +440,21 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
           >
             <Users className="w-3.5 h-3.5" />
             <span>Bekleme Listesi ({waitlistData.length})</span>
+          </button>
+
+          <button
+            onClick={() => { setActiveTab('messages'); refreshContactMessages(); }}
+            className={`py-3 px-3 font-semibold border-b-2 transition cursor-pointer flex items-center gap-1.5 ${
+              activeTab === 'messages'
+                ? 'border-indigo-500 text-indigo-400'
+                : 'border-transparent text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <Mail className="w-3.5 h-3.5" />
+            <span>Gelen Mesajlar ({contactMessages.length})</span>
+            {contactMessages.some((m) => !m.isRead) && (
+              <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
+            )}
           </button>
         </div>
 
@@ -874,6 +918,222 @@ export const CreatorStudioModal: React.FC<CreatorStudioModalProps> = ({
                       </span>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'messages' && (
+            <div className="space-y-5">
+              {/* Header Box with Status & Setup Guide Toggle */}
+              <div className="bg-slate-950/80 border border-slate-800 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center shrink-0">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white font-mono">destek@adaapps.dev</span>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-medium">
+                        Aktif İletişim Kutusu
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 mt-0.5">
+                      Web vitrinindeki "Bize Ulaşın" formundan gönderilen tüm mesajlar anında burada toplanır.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setShowEmailGuide(!showEmailGuide)}
+                    className="px-3 py-1.5 rounded-xl border border-indigo-500/40 text-indigo-300 hover:text-white bg-indigo-950/40 hover:bg-indigo-900/60 font-medium text-xs transition cursor-pointer flex items-center gap-1.5"
+                  >
+                    <HelpCircle className="w-3.5 h-3.5" />
+                    <span>{showEmailGuide ? 'Rehberi Gizle' : 'Alan Adı & E-posta Kurulum Rehberi'}</span>
+                  </button>
+
+                  <button
+                    onClick={refreshContactMessages}
+                    className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 transition cursor-pointer"
+                    title="Yenile"
+                  >
+                    <RefreshCw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Expandable Domain Email Setup Guide */}
+              {showEmailGuide && (
+                <div className="bg-gradient-to-br from-indigo-950/40 via-slate-950 to-slate-900 border border-indigo-500/30 rounded-2xl p-5 space-y-4 animate-in fade-in">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-300 flex items-center gap-1.5">
+                      <Settings className="w-3.5 h-3.5" />
+                      <span>destek@adaapps.dev İçin Ücretsiz E-posta Yönlendirme (5 Dakikada Kurulum)</span>
+                    </h4>
+                    <span className="text-[10px] px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-300">
+                      %100 Ücretsiz
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    <strong className="text-white">adaapps.dev</strong> alan adına gelen e-postaları doğrudan kişisel Gmail adresinize (<code className="text-indigo-300 bg-slate-900 px-1 py-0.5 rounded">nuraydinarikan@gmail.com</code>) yönlendirmek için en pratik yöntem <strong>Cloudflare Email Routing</strong> veya <strong>ImprovMX</strong> servisidir. Sunucu ücreti ödemeden profesyonel e-posta alabilirsiniz.
+                  </p>
+
+                  <div className="space-y-3 pt-1">
+                    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs">
+                      <div className="font-semibold text-white mb-1 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">1</span>
+                        <span>Yönlendirme Kuralı (Cloudflare Email Routing veya ImprovMX):</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2 font-mono text-[11px]">
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800 text-slate-300">
+                          <span className="text-slate-500 block text-[10px]">Özel Adres:</span>
+                          destek@adaapps.dev
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800 text-emerald-400">
+                          <span className="text-slate-500 block text-[10px]">Hedef (Kişisel E-posta):</span>
+                          nuraydinarikan@gmail.com
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-slate-900/90 border border-slate-800 rounded-xl p-3 text-xs">
+                      <div className="font-semibold text-white mb-1 flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-[10px]">2</span>
+                        <span>Alan Adınızın DNS Yönetim Paneline Eklenecek Kayıtlar (Örnek Cloudflare):</span>
+                      </div>
+                      <div className="space-y-1.5 mt-2 font-mono text-[11px] text-slate-300">
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between">
+                          <span>MX @ route1.mx.cloudflare.net (Öncelik: 83)</span>
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between">
+                          <span>MX @ route2.mx.cloudflare.net (Öncelik: 7)</span>
+                        </div>
+                        <div className="bg-slate-950 p-2 rounded border border-slate-800 flex items-center justify-between">
+                          <span>TXT @ "v=spf1 include:_spf.mx.cloudflare.net ~all"</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-[11px] text-slate-400 pt-1">
+                    💡 <em>Not: Alan adı kaydı henüz tamamlanmamış olsa bile, web sitesi üzerinden formu dolduran kullanıcıların tüm mesajları aşağıdaki gelen kutusuna anında düşmektedir.</em>
+                  </div>
+                </div>
+              )}
+
+              {/* Message List */}
+              {contactMessages.length === 0 ? (
+                <div className="text-center py-12 bg-slate-950/50 rounded-2xl border border-slate-800 p-6">
+                  <Inbox className="w-8 h-8 text-slate-600 mx-auto mb-2" />
+                  <h4 className="text-sm font-semibold text-white mb-1">Gelen Kutusunda Mesaj Yok</h4>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    Kullanıcılar "ADAApps Hakkında" bölümündeki iletişim formunu doldurduklarında mesajları burada listelenecektir.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between text-xs text-slate-400 px-1">
+                    <span>Toplam {contactMessages.length} İletişim & Geri Bildirim Talebi</span>
+                    <button
+                      onClick={() => {
+                        contactMessages.forEach((m) => markMessageAsRead(m.id));
+                        refreshContactMessages();
+                      }}
+                      className="text-indigo-400 hover:text-indigo-300 font-medium transition cursor-pointer"
+                    >
+                      Tümünü Okundu İşaretle
+                    </button>
+                  </div>
+
+                  {contactMessages.map((msg) => {
+                    const subjectBadge = {
+                      idea: { label: 'Uygulama Önerisi', color: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30' },
+                      bug: { label: 'Hata Bildirimi', color: 'bg-rose-500/20 text-rose-300 border-rose-500/30' },
+                      collab: { label: 'İş Birliği & Soru', color: 'bg-purple-500/20 text-purple-300 border-purple-500/30' },
+                      feedback: { label: 'Genel Görüş', color: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' }
+                    }[msg.subjectType] || { label: 'Geri Bildirim', color: 'bg-slate-500/20 text-slate-300 border-slate-500/30' };
+
+                    return (
+                      <div
+                        key={msg.id}
+                        className={`bg-slate-950/80 border rounded-2xl p-4 transition ${
+                          msg.isRead ? 'border-slate-800' : 'border-indigo-500/40 bg-slate-950'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5 pb-2.5 border-b border-slate-800/80">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className={`text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full border ${subjectBadge.color}`}>
+                              {subjectBadge.label}
+                            </span>
+                            <span className="font-semibold text-white text-xs">
+                              {msg.senderName || 'Anonim Kullanıcı'}
+                            </span>
+                            {msg.senderEmail && (
+                              <span className="text-[11px] text-slate-400 font-mono">
+                                &lt;{msg.senderEmail}&gt;
+                              </span>
+                            )}
+                            {!msg.isRead && (
+                              <span className="text-[10px] font-bold text-amber-400 flex items-center gap-1">
+                                • Yeni
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              {new Date(msg.timestamp).toLocaleString('tr-TR')}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Message Content */}
+                        <div className="text-xs text-slate-200 whitespace-pre-wrap leading-relaxed bg-slate-900/60 p-3 rounded-xl border border-slate-800/60 mb-3">
+                          {msg.message}
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center justify-between pt-1 text-xs">
+                          <div className="flex items-center gap-2">
+                            {msg.senderEmail && (
+                              <a
+                                href={`mailto:${msg.senderEmail}?subject=${encodeURIComponent(`Re: [ADAApps] ${subjectBadge.label}`)}&body=${encodeURIComponent(`Merhaba ${msg.senderName || ''},\n\nADAApps üzerinden gönderdiğiniz mesaj için teşekkür ederiz.\n\nİyi günler dileriz.\nADAApps Destek Ekibi`)}`}
+                                className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg font-medium transition flex items-center gap-1.5"
+                              >
+                                <Send className="w-3 h-3" />
+                                <span>E-posta ile Yanıtla</span>
+                              </a>
+                            )}
+
+                            {!msg.isRead && (
+                              <button
+                                onClick={() => {
+                                  markMessageAsRead(msg.id);
+                                  refreshContactMessages();
+                                }}
+                                className="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg font-medium transition cursor-pointer"
+                              >
+                                Okundu İşaretle
+                              </button>
+                            )}
+                          </div>
+
+                          <button
+                            onClick={() => {
+                              deleteContactMessage(msg.id);
+                              refreshContactMessages();
+                            }}
+                            className="p-1.5 text-slate-500 hover:text-rose-400 transition cursor-pointer"
+                            title="Mesajı Sil"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
