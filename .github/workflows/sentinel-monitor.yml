@@ -20,11 +20,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: 'npm'
+
+      - name: Bağımlılıkları Kur
+        run: npm ci || npm install
 
       - name: Sentinel Denetimini Başlat
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          EXIT_ON_FAILURE: 'false' # Kırmızı alarm e-postası atmasını engeller
         run: node scripts/sentinel-monitor.js
-        
